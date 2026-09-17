@@ -1,0 +1,10 @@
+{
+  "name": "insta360-lab-ai-hodnotenie",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Odovzdávací systém pre 10 praktických cvičení Insta360 Lab (natáčanie, Insta360 Studio, Premiere Pro), s AI hodnotením cez Anthropic API (Vercel serverless funkcia).",
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
