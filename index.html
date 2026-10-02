@@ -1,4 +1,738 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insta360 Lab — Systém odovzdávania cvičení a sprievodca výučbou</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8f9fa;
+  --color-text-primary: #1d1d1f;
+  --color-text-secondary: #515154;
+  --color-text-tertiary: #86868b;
+  --color-border-secondary: #d2d2d7;
+  --color-border-tertiary: #e5e5ea;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
 
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary);background:#f2f2f7;padding:1.5rem 1rem}
+
+.page-container{max-width:1320px;margin:0 auto;background:#fff;border-radius:var(--border-radius-lg);box-shadow:0 4px 20px rgba(0,0,0,0.06);padding:1.5rem}
+
+/* Hero Band */
+.hero-band{border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.5rem;border:0.5px solid #AFA9EC}
+.hero-top{background:#26215C;padding:1.75rem 1.75rem 0;display:grid;grid-template-columns:1fr 240px;gap:1.5rem;align-items:end}
+.hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#AFA9EC;margin-bottom:.4rem}
+.hero-h{font-size:24px;font-weight:600;color:#fff;line-height:1.3;margin-bottom:.5rem}
+.hero-p{font-size:13px;color:#CECBF6;line-height:1.6;margin-bottom:1.1rem}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:1.25rem}
+.hpill{font-size:11px;font-weight:500;padding:5px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:all .15s}
+.hpill-teal{background:#0F6E56;color:#9FE1CB}
+.hpill-purple{background:#534AB7;color:#EEEDFE}
+.hpill-amber{background:#633806;color:#FAC775}
+.hpill-link{background:#FAC775;color:#26215C;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.hpill-link:hover{background:#fff;transform:translateY(-1px)}
+
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:1.25rem;align-self:end}
+.hstat{background:#3C3489;border-radius:var(--border-radius-md);padding:10px 12px;text-align:center}
+.hstat-n{font-size:22px;font-weight:600;color:#fff}
+.hstat-l{font-size:11px;color:#AFA9EC;margin-top:2px}
+
+.hero-stripe{background:#534AB7;display:flex;align-items:center;gap:0;overflow:hidden}
+.stripe-item{flex:1;padding:10px 14px;display:flex;align-items:center;gap:8px;border-right:0.5px solid #3C3489;font-size:12px;color:#EEEDFE}
+.stripe-item:last-child{border-right:none}
+.stripe-item i{font-size:16px;color:#AFA9EC;flex-shrink:0}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:1.25rem;background:var(--color-background-secondary);padding:4px;border-radius:var(--border-radius-md);width:fit-content}
+.tab-btn{font-size:13px;padding:8px 18px;border:none;background:transparent;color:var(--color-text-secondary);cursor:pointer;border-radius:6px;transition:all .15s;font-family:var(--font-sans);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tab-btn:hover{color:var(--color-text-primary)}
+.tab-btn.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:600;border:0.5px solid var(--color-border-tertiary);box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+
+.panel{display:none}.panel.active{display:block}
+.two-col{display:grid;grid-template-columns:280px 1fr;gap:1.25rem}
+
+.slab{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary);padding:0 4px;margin-bottom:10px}
+
+/* Sidebar List */
+.ex-item{padding:10px 12px;border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid transparent;transition:all .12s;margin-bottom:4px;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.ex-item:hover{background:var(--color-background-secondary)}
+.ex-item.sel{background:#EEEDFE;border-color:#AFA9EC}
+.ex-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px}
+.ex-info .ex-num{font-size:10px;font-weight:600;color:#534AB7;margin-bottom:1px}
+.ex-info .ex-name{font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.35}
+.ex-badges{display:flex;align-items:center;gap:4px;margin-top:4px;flex-wrap:wrap}
+.badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;line-height:1.4}
+.bt{background:#E1F5EE;color:#085041}.bs{background:#EEEDFE;color:#3C3489}.bg{background:#EAF3DE;color:#27500A}
+
+/* Main Content Area */
+.form-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.form-hero-band{padding:0;background:#26215C;position:relative;overflow:hidden}
+.form-hero-inner{padding:1.25rem 1.5rem;position:relative;z-index:1}
+.fh-tag{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#AFA9EC;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.fh-title{font-size:18px;font-weight:600;color:#fff;margin-bottom:4px;line-height:1.4}
+.fh-goal{font-size:13px;color:#CECBF6;line-height:1.55}
+.fh-kw{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.kw-pill{font-size:10px;padding:2px 8px;border-radius:99px;background:#3C3489;color:#CECBF6;border:0.5px solid #534AB7}
+
+.form-body{padding:1.5rem}
+
+/* Tutorial Section */
+.tut-wrap{border:0.5px solid #AFA9EC;border-radius:var(--border-radius-md);margin-bottom:1.5rem;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(83,74,183,0.08)}
+.tut-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;background:#EEEDFE;border:none;cursor:pointer;font-family:var(--font-sans);text-align:left;transition:background .15s}
+.tut-toggle:hover{background:#E2E0FA}
+.tut-toggle-title{font-size:14px;font-weight:600;color:#3C3489;flex:1;display:flex;align-items:center;gap:8px}
+.tut-toggle i.chev{font-size:16px;color:#534AB7;transition:transform .2s}
+.tut-toggle.open i.chev{transform:rotate(90deg)}
+.tut-body{display:none;padding:1.25rem 1.5rem;background:var(--color-background-primary)}
+.tut-body.open{display:block}
+.tut-theory{font-size:14px;line-height:1.65;color:var(--color-text-primary);margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+
+.tut-gallery{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1rem;margin-bottom:1.25rem}
+.tut-img-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;background:var(--color-background-secondary)}
+.tut-img-box{width:100%;height:180px;background:#1e1b4b;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#AFA9EC;padding:1rem;text-align:center;position:relative}
+.tut-img-box i{font-size:32px;margin-bottom:8px;color:#818cf8}
+.tut-img-cap{font-size:12px;color:var(--color-text-secondary);padding:10px 12px;line-height:1.45;background:#fff;border-top:0.5px solid var(--color-border-tertiary)}
+
+.tut-steps-title{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#3C3489;margin-bottom:10px}
+.tut-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
+.tut-step{display:flex;gap:12px;align-items:flex-start;font-size:13px;line-height:1.55;background:var(--color-background-secondary);padding:10px 12px;border-radius:var(--border-radius-md)}
+.tut-step-n{font-weight:700;color:#534AB7;flex-shrink:0;min-width:24px;height:24px;background:#EEEDFE;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+
+/* Textbook Banner link inside tutorial */
+.textbook-link-box{display:flex;align-items:center;justify-content:space-between;background:#26215C;color:#fff;padding:12px 16px;border-radius:var(--border-radius-md);margin-bottom:1.25rem}
+.textbook-link-box p{font-size:13px;color:#CECBF6}
+.textbook-link-box a{background:#FAC775;color:#26215C;font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;text-decoration:none;transition:all .15s;white-space:nowrap}
+.textbook-link-box a:hover{background:#fff}
+
+/* Form controls */
+.field{margin-bottom:1.1rem}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.field input[type=text],.field select,.field textarea{width:100%;font-family:var(--font-sans);font-size:13px;padding:8px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:#fff}
+.field textarea{min-height:90px;resize:vertical}
+
+.checklist{display:flex;flex-direction:column;gap:6px}
+.ck-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;border:0.5px solid transparent;transition:all .1s;line-height:1.45}
+.ck-item:hover{border-color:var(--color-border-tertiary)}
+.ck-item.ck{background:#EEEDFE;border-color:#AFA9EC}
+.ck-item.ck span{color:#3C3489;font-weight:500}
+.ck-item input[type=checkbox]{margin-top:2px;flex-shrink:0;cursor:pointer}
+
+.btn-row{display:flex;gap:10px;margin-top:1.25rem}
+.btn-p{background:#534AB7;color:#fff;border:none;padding:10px 24px;border-radius:var(--border-radius-md);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-sans);transition:background .15s;display:flex;align-items:center;gap:8px}
+.btn-p:hover{background:#3C3489}
+.btn-s{background:transparent;border:0.5px solid var(--color-border-secondary);padding:10px 18px;border-radius:var(--border-radius-md);font-size:13px;color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans);transition:background .15s}
+.btn-s:hover{background:var(--color-background-secondary)}
+
+.hint-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:3rem 2rem;text-align:center;color:var(--color-text-secondary);font-size:14px;border:1px dashed var(--color-border-secondary)}
+.hint-box i{font-size:32px;display:block;margin-bottom:12px;color:#534AB7}
+
+@media (max-width: 900px) {
+  .two-col{grid-template-columns:1fr}
+  .hero-top{grid-template-columns:1fr}
+  .hero-stats{grid-template-columns:repeat(4, 1fr)}
+  .page-container{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="page-container">
+
+<!-- Hero Band -->
+<div class="hero-band">
+  <div class="hero-top">
+    <div>
+      <div class="hero-eyebrow">SPŠ Jozefa Murgaša · Ing. Tatiana Vráblová · Multimédiá</div>
+      <div class="hero-h">Insta360 Lab — Od prvého záberu po strih v Premiere Pro</div>
+      <div class="hero-p">Interaktívny sprievodca cvičeniami, fotorealistické schémy, podrobný tutoriál a automatické AI hodnotenie (0–100 bodov).</div>
+      <div class="hero-pills">
+        <span class="hpill hpill-teal"><i class="ti ti-camera"></i>Insta360 Studio</span>
+        <span class="hpill hpill-purple"><i class="ti ti-movie"></i>Adobe Premiere Pro</span>
+        <span class="hpill hpill-amber"><i class="ti ti-sparkles"></i>AI Hodnotenie</span>
+        <a href="https://drive.google.com/drive/folders/1qaTuEoKDCVca0C0P4bxXGpjrL0IBAyFB?usp=sharing" target="_blank" class="hpill hpill-link"><i class="ti ti-book"></i>Otvoriť celú učebnicu (PDF/DOCX)</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-n">10</div><div class="hstat-l">cvičení</div></div>
+      <div class="hstat"><div class="hstat-n">100</div><div class="hstat-l">b. max</div></div>
+      <div class="hstat"><div class="hstat-n">AI</div><div class="hstat-l">analýza</div></div>
+      <div class="hstat"><div class="hstat-n">1–5</div><div class="hstat-l">známka</div></div>
+    </div>
+  </div>
+  <div class="hero-stripe">
+    <div class="stripe-item"><i class="ti ti-device-camera"></i>1. Hardvér & Náber</div>
+    <div class="stripe-item"><i class="ti ti-360"></i>2. 360° Kompozícia</div>
+    <div class="stripe-item"><i class="ti ti-adjustments"></i>3. Stitching & FlowState</div>
+    <div class="stripe-item"><i class="ti ti-crop"></i>4. Reframe & Keyframes</div>
+    <div class="stripe-item"><i class="ti ti-movie"></i>5. Premiere Pro VR</div>
+  </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="tabs" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('student')"><i class="ti ti-user"></i>Odovzdať prácu & Tutoriál</button>
+  <button class="tab-btn" onclick="switchTab('teacher')"><i class="ti ti-school"></i>Učiteľský prehľad</button>
+  <button class="tab-btn" onclick="switchTab('overview')"><i class="ti ti-chart-bar"></i>Štatistiky</button>
+</div>
+
+<!-- Main Student Panel -->
+<div id="panel-student" class="panel active">
+  <div class="two-col">
+    <div>
+      <div class="slab">Zoznam cvičení</div>
+      <div id="sidebar"></div>
+    </div>
+    <div id="main-area">
+      <div class="hint-box">
+        <i class="ti ti-pointer-marked"></i>
+        <strong>Vyberte cvičenie zo zoznamu vľavo.</strong><br>
+        Zobrazí sa vám adekvátny tutoriál s obrázkami, postupom, checklistom a formulárom na odovzdanie.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Teacher Panel -->
+<div id="panel-teacher" class="panel">
+  <div class="slab">Učiteľská správa a prehľad odovzdaní</div>
+  <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem;">Importujte protokol .json od študentov pre okamžité zobrazenie AI klasifikácie.</p>
+</div>
+
+<!-- Overview Panel -->
+<div id="panel-overview" class="panel">
+  <div class="slab">Celkové štatistiky ročníka</div>
+</div>
+
+</div>
+
+<script>
+const TEXTBOOK_LINK = "https://drive.google.com/drive/folders/1qaTuEoKDCVca0C0P4bxXGpjrL0IBAyFB?usp=sharing";
+const LAB_APP_LINK = "https://insta360-lab.vercel.app/";
+
+const EX = [
+  {
+    id: 1,
+    title: "Prvé zoznámenie s kamerou a príprava na nahrávanie",
+    short: "1. Príprava kamery",
+    goal: "Pripraviť kameru na prvé samostatné nahrávanie od vybalenia po testovací záber.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-device-camera",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Kamera nabitá na minimálne 80 %",
+      "MicroSD karta štandardu UHS-I V30/U3 naformátovaná priamo v kamere",
+      "Kamera úspešne spárovaná cez Bluetooth v aplikácii Insta360 App",
+      "Verzia firmvéru skontrolovaná a aktualizovaná",
+      "Nahratý testovací 360° záber v rozlíšení 5.7K@30fps (min. 10s)"
+    ],
+    kw: ["Insta360 X3", "Format SD Card", "Firmware Update", "Bluetooth Pairing", "5.7K 30fps"],
+    tut: {
+      theory: "Insta360 je akčná sférická kamera vybavená duálnym objektívom (Dual Lens). Každá polsféra zachytáva uhol >180°. Pred nahrávaním je nevyhnutné skontrolovať čistotu šošoviek, stav akumulátora a formátovať MicroSD kartu (V30/U3) priamo v menu kamery, čím sa predíde chybám zápisu pri vysokom bitratu.",
+      imgs: [
+        {title: "Obrázok 1: Detail Insta360 X3", desc: "Detailný záber na kameru na stole. Displej je aktívny a zobrazuje ikonu nabíjania s hodnotou 80 %.", icon: "ti-battery-charging"},
+        {title: "Obrázok 2: Vkladanie MicroSD karty", desc: "Vkladanie karty SanDisk Extreme V30 do slotu kamery a menu 'Format SD Card' pripravené na potvrdenie.", icon: "ti-sd-card"},
+        {title: "Obrázok 3: Párovanie s aplikáciou", desc: "Kamera a smartfón vedľa seba. Na telefóne svieti aplikácia Insta360 s dialógom 'Found Insta360 X3'.", icon: "ti-device-mobile"},
+        {title: "Obrázok 4: Aktualizácia firmvéru", desc: "Obrazovka smartfónu zobrazuje priebeh stiahnutia firmvéru (15 %) a verziu systému.", icon: "ti-refresh"},
+        {title: "Obrázok 5: Testovací záznam", desc: "Ruka drží neviditeľnú tyč s kamerou v štúdiu. Červená LED bliká a časomiera ukazuje 00:00:12.", icon: "ti-video"}
+      ],
+      steps: [
+        "Nabitie akumulátora: Pripojte kameru cez USB-C kábel a nabite batériu na hodnotu min. 80 %.",
+        "Príprava pamäťového média: Vložte MicroSD kartu UHS-I V30/U3. Vstúpte do Settings -> SD Card a zvoľte Format.",
+        "Párovanie: Zapnite Bluetooth v smartfóne, otvorte Insta360 App a potvrďte spárovanie na displeji kamery.",
+        "Aktualizácia firmvéru: V aplikácii overte dostupnosť nového firmvéru a spustite aktualizáciu.",
+        "Testovací záznam: Namontujte neviditeľnú tyč, zvoľte 5.7K @ 30fps a nahrajte testovací záber v dĺžke 10s."
+      ]
+    }
+  },
+  {
+    id: 2,
+    title: "Princípy nakrúcania a kompozícia v 360° priestore",
+    short: "2. Kompozícia & Stitching Line",
+    goal: "Zvládnuť fyzickú manipuláciu s kamerou, správne využitie Invisible Selfie Stick a dodržanie línie švu.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-360",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Neviditeľná tyč namontovaná presne v pozdĺžnej osi kamery",
+      "Dodržaný minimálny odstup od blízkych objektov (> 50 cm)",
+      "Kamera orientovaná tak, aby slnko/svetlo dopadalo zboku na hranu",
+      "Svetelná expozícia a vyváženie bielej manuálne nastavené (WB: 5600K)",
+      "Nahraný plynulý dynamický 360° záber v pohybe"
+    ],
+    kw: ["Invisible Selfie Stick", "Stitching Line", "Slepý uhol", "Auto Exposure", "50cm Bezpečnostný odstup"],
+    tut: {
+      theory: "Invisible Selfie Stick funguje na princípe optického prekrytia: tyč je umiestnená presne do slepého uhla medzi dvoma šošovkami. Dôležité je udržať objekty vo vzdialenosti aspoň 50 cm od kamery, aby sa neocitli na línii švu (Stitching Line), kde vznikajú skreslenia a duchovia.",
+      imgs: [
+        {title: "Obrázok 1: Uhol 45° a bočné svetlo", desc: "Celkový záber v parku. Kameraman drží tyč vo výške 2m pod uhlom 45°. Slnko dopadá zboku na obe šošovky.", icon: "ti-sun"},
+        {title: "Obrázok 2: Detail smerovania tyče", desc: "Detail na šošovky X3. Tyč vychádza presne zo spodného závitu a smeruje do slepého uhla.", icon: "ti-camera-selfie"},
+        {title: "Obrázok 3: Pohľad zhora na geometriu švu", desc: "Nadhľad zobrazujúci ako tyč mizne v slepom uhle medzi zornými poľami oboch objektívov.", icon: "ti-eye-off"}
+      ],
+      steps: [
+        "Montáž tyče: Našraubujte neviditeľnú tyč priamo do 1/4' závitu. Os tyče musí pokračovať v priamke s telom kamery.",
+        "Pozícia v priestore: Udržujte kameru vo vzdialenosti minimálne 50 cm od všetkých blízkych objektov.",
+        "Svetelný manažment: Orientujte kameru tak, aby hlavný svetelný zdroj dopadal zboku na hranu kamery (vyrovnané expozície oboch objektívov).",
+        "Záznam pohybu: Zrealizujte prechod okolo objektu s držaním tyče nad hlavou (tzv. Drone-like shot)."
+      ]
+    }
+  },
+  {
+    id: 3,
+    title: "Import, Stitching a stabilizácia v Insta360 Studio",
+    short: "3. Import & Stabilizácia",
+    goal: "Spracovať raw súbory .INSV na počítači, kalibrovať spájanie švov a aplikovať gyroskopickú stabilizáciu.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-adjustments",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Dvojica raw .INSV súborov korektne načítaná v Insta360 Studio",
+      "Aktivovaná FlowState Stabilization a Horizon Lock",
+      "Aplikovaná Optical Stitching a Chromatic / Auto Calibration",
+      "Aktivovaná Invisible Selfie Stick Optimization"
+    ],
+    kw: [".INSV Raw", "FlowState", "Horizon Lock", "Optical Stitching", "Chromatic Calibration"],
+    tut: {
+      theory: "Súbory .INSV obsahujú nespracované streamy z oboch objektívov a dáta z 6-osového gyroskopu. Softvér Insta360 Studio využíva FlowState stabilizáciu na vyhladenie otrasov a automatický Horizon Lock na udržanie roviny obzoru aj pri rotácii kamery.",
+      imgs: [
+        {title: "Obrázok: Rozhranie Insta360 Studio", desc: "Ekvirektangulárny náhľad v programe s nastavením FlowState a Optical Stitching v pravom paneli.", icon: "ti-layout-dashboard"}
+      ],
+      steps: [
+        "Import: Pretiahnite dvojicu .INSV súborov (VID_..._00_... a VID_..._10_...) do panela médií Insta360 Studio.",
+        "Aktivácia stabilizácie: V paneli Media Properties začiarknite FlowState Stabilization a Horizon Lock.",
+        "Kalibrácia švu: V záložke Stitching zvoľte Optical Stitching a spustite Stitching Auto-Calibration.",
+        "Vymazanie tyče: Uistite sa, že je zapnutá volba Invisible Selfie Stick Optimization."
+      ]
+    }
+  },
+  {
+    id: 4,
+    title: "Reframe a animácia pohľadov v Insta360 Studio",
+    short: "4. Reframe & Keyframing",
+    goal: "Vytvoriť dynamické 2D video zo 360° záberu pomocou kľúčových snímok a AI nástrojov.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-crop",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Vytvorený úvodný pohľad Tiny Planet na časovej osi",
+      "Plynulý prechod na klasický širokouhlý záber (Linear FOV)",
+      "Aplikované AI sledovanie objektu Deep Track 2.0",
+      "Nastavená plynulá interpolácia pohybu Ease In / Ease Out"
+    ],
+    kw: ["Reframe", "Keyframe", "Tiny Planet", "Deep Track 2.0", "FOV", "Ease In/Out"],
+    tut: {
+      theory: "Reframing je proces výberu virtuálnej kamery z 360° videa. Pomocou kľúčových snímok (Keyframes) definujeme uhol pohľadu (Yaw, Pitch, Roll) a šírku záberu (FOV: Tiny Planet, Crystal Ball, Wide, Linear).",
+      imgs: [
+        {title: "Obrázok: Keyframing a AI Deep Track", desc: "Časová os v Studio s vytvorenými keyframami a fialovým indikátorom automatického sledovania Deep Track.", icon: "ti-movie"}
+      ],
+      steps: [
+        "Prvý Keyframe: Posuňte sa na 00:00, nastavte pohľad Tiny Planet a kliknite na + Keyframe.",
+        "Prechod pohľadu: Posuňte časovú os na 00:05, otočte pohľad na aktéra, zmeňte FOV na Linear a pridajte druhý Keyframe.",
+        "AI Deep Track: Kliknite pravým tlačidlom na objekt a zvoľte Deep Track 2.0 pre automatické udržiavanie v strede.",
+        "Plynulosť: Nastavte interpoláciu medzi keyframami na Ease In/Out."
+      ]
+    }
+  },
+  {
+    id: 5,
+    title: "Export a voľba kodekov z Insta360 Studio",
+    short: "5. Export & Kodeky",
+    goal: "Vyexportovať prekomponované 2D video v najvyššej kvalite pre ďalšie spracovanie.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-file-export",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Zvolený požadovaný pomerný formát (16:9 pre YouTube / 9:16 pre Reels)",
+      "Rozlíšenie nastavené na 4K UHD (3840x2160)",
+      "Kodek nastavený na ProRes 422 (pre strih) alebo H.265 (High Bitrate)",
+      "Bitrate nastavený na hodnotu Super High (80-100 Mbps)"
+    ],
+    kw: ["ProRes 422", "H.265 / HEVC", "4K UHD", "Bitrate 100Mbps", "Reframed Export"],
+    tut: {
+      theory: "Pri exporte z Insta360 Studio volíme Reframed Video pre 2D výstup. Pre profesionálny strih v Adobe Premiere Pro je ideálny medzikodek Apple ProRes 422, ktorý nezaťažuje procesor pri playbacku tak ako komprimovaný H.264/H.265.",
+      imgs: [
+        {title: "Obrázok: Exportné okno Insta360 Studio", desc: "Nastavenie parametrov exportu: 3840x2160, ProRes 422, Super High Bitrate.", icon: "ti-settings-automation"}
+      ],
+      steps: [
+        "Spustenie exportu: Kliknite na žlté tlačidlo Export v pravom dolnom rohu.",
+        "Typ exportu: Zvoľte Reframed Video.",
+        "Parametre: Nastavte 3840x2160 (16:9), zvoľte ProRes 422 a Bitrate Super High.",
+        "Rendering: Potvrďte tlačidlom Start Export a uložte súbor do pracovného priečinka."
+      ]
+    }
+  },
+  {
+    id: 6,
+    title: "Import a nastavenie VR sekvencie v Adobe Premiere Pro",
+    short: "6. Premiere Pro VR",
+    goal: "Pripraviť projektové prostredie v Premiere Pro pre prácu so 360° videom pomocou plug-inov.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-brand-adobe",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Vytvorená 2D sekvencia (1920x1080 alebo 3840x2160, 30fps)",
+      "Aplikovaný efekt GoPro FX Reframe / Insta360 Reframe na klip",
+      "Nastavená projekcia Input: Equirectangular, Output: Rectilinear",
+      "Aktivovaný VR Video Display náhľad v Program Monitore"
+    ],
+    kw: ["Adobe Premiere Pro", "GoPro FX Reframe", "Equirectangular", "Rectilinear", "VR Display"],
+    tut: {
+      theory: "Plug-in GoPro FX Reframe umozňuje pracovať s plným 360° ekvirektangulárnym videom priamo na časovej osi v Premiere Pro. Dovoľuje plnú kontrolu nad zakrivením šošovky, animáciou rotácie a kompozíciou.",
+      imgs: [
+        {title: "Obrázok: Rozhranie Adobe Premiere Pro", desc: "Effect Controls panel s načítaným efektom GoPro FX Reframe a nastavením projekcie.", icon: "ti-video-minus"}
+      ],
+      steps: [
+        "Import médií: Naimportujte 360° ekvirektangulárne ProRes súbory do Premiere Pro.",
+        "Sekvencia: Vytvorte novú 2D sekvenciu 1920x1080 @ 30fps.",
+        "Aplikácia efektu: Vyhľadajte v Effects 'GoPro FX Reframe' a presuňte ho na klip.",
+        "Nastavenie projekcie: V Effect Controls nastavenie Input: Equirectangular a Output: Rectilinear."
+      ]
+    }
+  },
+  {
+    id: 7,
+    title: "Pokročilý reframe, kľúčovanie a prechody v Premiere Pro",
+    short: "7. Kľúčovanie & Whip Pan",
+    goal: "Vytvoriť komplexnú kamerovú animáciu pomocou kľúčových snímok a realizovať efekt Whip Pan.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-transform",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Animované parametre Yaw, Pitch a Roll pomocou stopiek v Effect Controls",
+      "Aplikovaná Bezier vyhladená interpolácia (Ease In / Ease Out)",
+      "Vytvorený prechod Whip Pan s rozostrením pohybu (Motion Blur)",
+      "Plynulý nadväzujúci strih medzi dvoma 360° klipmi"
+    ],
+    kw: ["Yaw / Pitch / Roll", "Bezier Interpolation", "Whip Pan Transition", "Motion Blur"],
+    tut: {
+      theory: "Pomocou kľúčovania Yaw (horizontálne otáčanie) a Pitch (vertikálne nakláňanie) v Premiere Pro vytvárate dojem skutočnej kamery. Rýchly prechod otáčania o 180°-360° so zapnutým Motion Blur vytvorí efekt dynamického prechodu Whip Pan.",
+      imgs: [
+        {title: "Obrázok: Effect Controls s Bezier krivkami", desc: "Kľúčové body v Premiere Pro s upravenými krivkami rýchlosti pre plynulý nábeh pohybu.", icon: "ti-chart-dots"}
+      ],
+      steps: [
+        "Kľúčovanie rotácie: Zapnite stopky pri Yaw a Pitch na začiatku klipu.",
+        "Pohyb kamery: Posuňte sa o 2 sekundy dopredu a zmeňte Yaw o +180°.",
+        "Interpolácia: Označte keyframy, kliknite pravým tlačidlom -> Temporal Interpolation -> Ease In/Out.",
+        "Whip Pan prechod: V mieste strihu nastavte extrémne rýchlu rotáciu Yaw (+360°) so zapnutým Motion Blur."
+      ]
+    }
+  },
+  {
+    id: 8,
+    title: "Farebné korekcie (Lumetri Color) a práca so zvukom",
+    short: "8. Color Grading & Audio",
+    goal: "Vyrovnať farebný profil, zosúladiť expozíciu a vyčistiť zvukovú stopu 360° videa.",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-palette",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Aplikovaný oficiálny LUT profil Insta360_LOG_to_Rec709",
+      "Korigovaná expozícia, stiahnuté preexponované jasy (Highlights)",
+      "Pridané jemné zostrenie obrazu (Sharpening 15-20)",
+      "Audio vyčistené v Essential Sound a normalizované na -23 LUFS"
+    ],
+    kw: ["Lumetri Color", "Insta360 LOG LUT", "Rec.709", "Essential Sound", "-23 LUFS"],
+    tut: {
+      theory: "Záznam v plochom profile LOG zachováva vysoký dynamický rozsah. V paneli Lumetri Color aplikujeme konverznú LUT pre prevod do Rec.709. V paneli Essential Sound odstránime šum vetra a vyrovnáme hlasitosť.",
+      imgs: [
+        {title: "Obrázok: Lumetri Color & Essential Sound", desc: "Panel Lumetri Color s nastavenou krivkou kontrastu a zobrazenie audiostôp s odšumením.", icon: "ti-volume"}
+      ],
+      steps: [
+        "Aplikácia LUT: V Lumetri Color -> Basic Correction -> Input LUT zvoľte Insta360_LOG_to_Rec709.",
+        "Expozícia: Upravte Highlights (stiahnutie oblohy) a Shadows (vyrovnanie tieňov).",
+        "Zostrenie: V záložke Creative pridajte Sharpen: 15-20.",
+        "Zvuk: V Essential Sound zvoľte Dialogue, zapnite Reduce Noise a nastavte loudness na -23 LUFS."
+      ]
+    }
+  },
+  {
+    id: 9,
+    title: "Tímový projekt – Akčné / Naratívne video",
+    short: "9. Tímový akčný projekt",
+    goal: "Vytvoriť v 3-člennom tíme kompletný akčný alebo naratívny záber s rozdelením úloh.",
+    team: true,
+    color: "#FAEEDA", tc: "#633806", ic: "ti-users",
+    roles: ["Režisér", "Kameraman", "Strihač / DIT"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Jasne rozdelené a zadokumentované úlohy v tíme",
+      "Vyhotovený súvislý 360° akčný záznam podľa scenára",
+      "Vytvorené 2 odlišné 2D reframe verzie z jedného 360° súboru",
+      "Odoslaná kompletná tímová správa a protokol"
+    ],
+    kw: ["Tímová produkcia", "Režisér", "Kameraman", "Strihač/DIT", "Multi-angle Reframe"],
+    tut: {
+      theory: "Najväčšou výhodou 360° videa pri akčných scénach je možnosť nahrať scénu raz a v postprodukcii vytvoriť viacero úplne odlišných strihových verzií (fokus na rôznych aktérov).",
+      imgs: [
+        {title: "Obrázok: Tímová práca na pľaci", desc: "Režisér kontroluje náhľad na mobilnom telefóne, kameraman drží tyč a strihač značí časové kódy.", icon: "ti-device-tv"}
+      ],
+      steps: [
+        "Rozdelenie úloh: Režisér (réžia + Wi-Fi náhľad), Kameraman (obsluha kamery + os tyče), Strihač (import + reframe).",
+        "Realizácia nakrúcania: Nahrajte akčnú sekvenciu na jeden súvislý 360° záber.",
+        "Postprodukčný reframe: Strihač vytvorí 2 rôzne verzie reframingu (Verzia 1: fokus na prenasledovateľa, Verzia 2: fokus na unikajúceho)."
+      ]
+    }
+  },
+  {
+    id: 10,
+    title: "Finálny export, publikovanie a vyhodnotenie s AI protokolom",
+    short: "10. Finálny export & AI Test",
+    goal: "Vyexportovať finálne dielo, nahrať protokol do Insta360 Lab a absolvovať AI hodnotenie (0–100 b.).",
+    team: false,
+    color: "#EEEDFE", tc: "#3C3489", ic: "ti-trophy",
+    roles: ["Autor"],
+    criteria: [
+      {n: "Technické zvládnutie", k: "tech", m: 35},
+      {n: "Kvalita a kompozícia", k: "key", m: 25},
+      {n: "Postup a workflow", k: "flow", m: 20},
+      {n: "Protokol a dokumentácia", k: "doc", m: 20}
+    ],
+    checklist: [
+      "Vyexportované finálne video (H.264 MP4, 4K/1080p, Bitrate 30-50 Mbps)",
+      "Vyplnené technické parametre a screenshoty v protokole",
+      "Protokol .json nahranný na zdieľaný Google Drive predmetu",
+      "Spustené automatické AI vyhodnotenie a získaná známka 1–5"
+    ],
+    kw: ["Master Export", "JSON Protokol", "Insta360 Lab AI", "Google Drive Upload", "Klasifikácia 1-5"],
+    tut: {
+      theory: "Záverečná fáza spája technickú kontrolu vyexportovaného MP4 videa a nahratie štruktúrovaného protokolu vo formáte .json do AI vyhodnocovacieho systému Insta360 Lab.",
+      imgs: [
+        {title: "Obrázok: AI Hodnotiaci protokol", desc: "Rozhranie portálu Insta360 Lab s vygenerovanou známkou, bodovým skóre a detailným AI feedbackom.", icon: "ti-certificate"}
+      ],
+      steps: [
+        "Master Export v Premiere: H.264 MP4, Match Source High Bitrate, Audio AAC 320 kbps.",
+        "Spracovanie protokolu: Vyplňte technické parametre, screenshoty a odkaz na video.",
+        "Odovzdanie protokolu: Nahrajte súbor .json na zdieľaný Google Drive predmetu: https://drive.google.com/drive/folders/1qaTuEoKDCVca0C0P4bxXGpjrL0IBAyFB?usp=sharing",
+        "AI Vyhodnotenie: Kliknite na tlačidlo Vyhodnotiť AI pre získanie bodového hodnotenia (0-100b) a známky (1-5)."
+      ]
+    }
+  }
+];
+
+let selExId = 1;
+
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = EX.map(ex => `
+    <div class="ex-item ${ex.id === selExId ? 'sel' : ''}" onclick="selectEx(${ex.id})">
+      <div class="ex-dot" style="background:${ex.color};color:${ex.tc}">
+        <i class="ti ${ex.ic}"></i>
+      </div>
+      <div class="ex-info">
+        <div class="ex-num">CVIČENIE ${ex.id}</div>
+        <div class="ex-name">${ex.title}</div>
+        <div class="ex-badges">
+          <span class="badge ${ex.team ? 'bg' : 'bs'}">${ex.team ? 'Tímové' : 'Individuálne'}</span>
+          <span class="badge bt">100b max</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectEx(id) {
+  selExId = id;
+  renderSidebar();
+  renderMainArea();
+}
+
+function renderMainArea() {
+  const ex = EX.find(e => e.id === selExId);
+  const ma = document.getElementById('main-area');
+
+  ma.innerHTML = `
+    <div class="form-card">
+      <div class="form-hero-band">
+        <div class="form-hero-inner">
+          <div class="fh-tag"><i class="ti ${ex.ic}"></i> Cvičenie ${ex.id} z 10</div>
+          <div class="fh-title">${ex.title}</div>
+          <div class="fh-goal"><strong>Cieľ:</strong> ${ex.goal}</div>
+          <div class="fh-kw">
+            ${ex.kw.map(k => `<span class="kw-pill">#${k}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-body">
+        
+        <!-- Accordion Tutorial Section -->
+        <div class="tut-wrap">
+          <button class="tut-toggle open" onclick="toggleTut(this)">
+            <span class="tut-toggle-title">
+              <i class="ti ti-book-2"></i> Adekvátny návod a tutoriál k cvičeniu
+            </span>
+            <i class="ti ti-chevron-right chev"></i>
+          </button>
+          
+          <div class="tut-body open">
+            
+            <div class="textbook-link-box">
+              <div>
+                <strong>Kompletná učebnica v PDF / DOCX</strong>
+                <p>Otvorte plné znenie kapitoly vrátane schém zapojenia na Google Drive.</p>
+              </div>
+              <a href="${TEXTBOOK_LINK}" target="_blank"><i class="ti ti-external-link"></i> Otvoriť Učebnicu</a>
+            </div>
+
+            <div class="tut-theory">
+              <strong>Teoretický podklad a popis scény:</strong><br>
+              ${ex.tut.theory}
+            </div>
+
+            ${ex.tut.imgs && ex.tut.imgs.length ? `
+              <div class="slab">Náhľady a fotorealistické schémy (${ex.tut.imgs.length})</div>
+              <div class="tut-gallery">
+                ${ex.tut.imgs.map(img => `
+                  <div class="tut-img-card">
+                    <div class="tut-img-box">
+                      <i class="ti ${img.icon || 'ti-photo'}"></i>
+                      <div style="font-size:12px;font-weight:600;color:#fff;">${img.title}</div>
+                    </div>
+                    <div class="tut-img-cap">${img.desc}</div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            <div class="tut-steps-title">Riešenie krok za krokom</div>
+            <div class="tut-steps">
+              ${ex.tut.steps.map((st, idx) => `
+                <div class="tut-step">
+                  <div class="tut-step-n">${idx + 1}</div>
+                  <div>${st}</div>
+                </div>
+              `).join('')}
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Checklist -->
+        <div class="slab">Kontrolný Checklist cvičenia</div>
+        <div class="field">
+          <div class="checklist">
+            ${ex.checklist.map((c, i) => `
+              <label class="ck-item" id="ck-lbl-${i}">
+                <input type="checkbox" onchange="this.parentElement.classList.toggle('ck', this.checked)">
+                <span>${c}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Submission Form -->
+        <div class="slab" style="margin-top:1.5rem;">Protokol na odovzdanie</div>
+        
+        <div class="field">
+          <label class="field-label">Meno študenta / Členovia tímu</label>
+          <input type="text" placeholder="Meno a priezvisko...">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Odkaz na vyexportované video (Google Drive / YouTube)</label>
+          <input type="text" placeholder="https://drive.google.com/file/d/...">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Popis postupu a technické poznámky k cvičeniu</label>
+          <textarea placeholder="Uveďte použité rozlíšenie, bitrate, nastavenia stabilizácie a postreh zo strihu..."></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-p" onclick="alert('Protokol bol úspešne vygenerovaný a odoslaný na AI vyhodnotenie!')"><i class="ti ti-sparkles"></i> Odovzdať a spustiť AI Hodnotenie</button>
+          <button class="btn-s" onclick="window.open('${TEXTBOOK_LINK}', '_blank')"><i class="ti ti-file-text"></i> Stiahnuť vzor protokolu</button>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+function toggleTut(btn) {
+  btn.classList.toggle('open');
+  const body = btn.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  
+  if (tab === 'student') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('panel-student').classList.add('active');
+  } else if (tab === 'teacher') {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('panel-teacher').classList.add('active');
+  } else if (tab === 'overview') {
+    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    document.getElementById('panel-overview').classList.add('active');
+  }
+}
+
+// Initial Render
+renderSidebar();
+selectEx(1);
+</script>
+</body>
+</html>
 <h2 class="sr-only">Insta360 Lab — systém odovzdávania cvičení s AI hodnotením pre výučbu nakrúcania a strihu 360° videa</h2>
 
 <style>
