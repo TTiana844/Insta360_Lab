@@ -3,7 +3,7 @@
 // Jedna funkcia, viac akcií: { action, password, ... }
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { dbConfigured, cmd, hgetall, getJSON, setJSON, PROJECT, subsKey, ovrKey } from "./_db.js";
+import { dbConfigured, dbEnvNames, cmd, hgetall, getJSON, setJSON, PROJECT, subsKey, ovrKey } from "./_db.js";
 
 const EX_IDS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const MAX_STUDENTS = 40;
@@ -31,15 +31,24 @@ export default async function handler(req, res) {
     res.status(500).json({ error: "Server nemá nastavený TEACHER_PASSWORD (Vercel → Settings → Environment Variables)." });
     return;
   }
-  if (!dbConfigured()) {
-    res.status(500).json({ error: "Server nemá pripojenú databázu (Upstash Redis)." });
-    return;
-  }
-
   const body = req.body || {};
   if (!body.password || !passwordOk(body.password, real)) {
     await new Promise(r => setTimeout(r, 600)); // spomalí hádanie hesla
     res.status(401).json({ error: "Nesprávne heslo." });
+    return;
+  }
+
+  // Kontrola databázy až PO overení hesla — diagnostika (názvy premenných) sa tak ukáže len učiteľovi.
+  if (!dbConfigured()) {
+    const names = dbEnvNames();
+    res.status(500).json({
+      error: "Server nemá pripojenú databázu (Upstash Redis). "
+        + (names.length
+          ? `V tomto nasadení sú premenné: ${names.join(", ")} — hľadá sa dvojica KV_REST_API_URL + KV_REST_API_TOKEN (alebo UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN, aj s predponou); URL musí začínať https://. `
+          : "V tomto nasadení nie je žiadna premenná s databázou. ")
+        + "Skontroluj, že sú premenné pridané pre prostredie, v ktorom stránku otvárate (Production / Preview), a spusti Redeploy.",
+      env: names
+    });
     return;
   }
 
