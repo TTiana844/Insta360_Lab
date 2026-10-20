@@ -155,6 +155,14 @@ body{font-family:var(--font-sans);color:var(--color-text-primary)}
 .field textarea{min-height:85px;resize:vertical}
 
 .members-grid{display:flex;flex-direction:column;gap:6px}
+.team-plan{border:0.5px solid #9FE1CB;background:#F3FBF7;border-radius:var(--border-radius-md);padding:11px 13px;margin-bottom:1rem}
+.team-plan-h{font-size:12px;font-weight:600;color:#085041;display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.team-plan-row{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:5px 0;border-top:0.5px solid #D3EFE3;font-size:12px;line-height:1.5}
+.team-plan-row:first-of-type{border-top:none}
+.team-plan-role{font-weight:600;color:#0F6E56}
+.team-plan-task{color:var(--color-text-primary)}
+.team-plan-note{font-size:11.5px;color:#085041;margin-top:8px;padding-top:7px;border-top:0.5px solid #D3EFE3}
+@media(max-width:560px){.team-plan-row{grid-template-columns:1fr;gap:2px}}
 .mrow{display:flex;gap:7px;align-items:center}
 .mrow input{flex:1}
 .mrow select{width:130px}
@@ -311,12 +319,12 @@ body{font-family:var(--font-sans);color:var(--color-text-primary)}
 <div class="hero-band">
   <div class="hero-top">
     <div>
-      <div class="hero-eyebrow">SPŠJM 2567 Multimédiá  Ing. Tatiana Vráblová</div>
+      <div class="hero-eyebrow">SPŠJM 2567 Multimédiá AVT 4. ročník Ing. Tatiana Vráblová</div>
       <div class="hero-eyebrow">Insta360 Lab · Nakrúcanie a strih 360° videa · Insta360 Studio · Adobe Premiere Pro</div>
       <div class="hero-h">Insta360 Lab — od prvého záberu po strih v Premiere Pro</div>
-      <div class="hero-p">Tímové aj individuálne cvičenia s automatickým AI hodnotením.<br>Odovzdávanie prác, screenshoty, videá a klasifikácia 1–5.</div>
+      <div class="hero-p">Každé cvičenie môžeš robiť samostatne alebo v tíme (2–4 členovia) s automatickým AI hodnotením.<br>Odovzdávanie prác, screenshoty, videá a klasifikácia 1–5.</div>
       <div class="hero-pills">
-        <span class="hpill hpill-teal"><i class="ti ti-users" style="font-size:11px;" aria-hidden="true"></i>Tímové zadania</span>
+        <span class="hpill hpill-teal"><i class="ti ti-users" style="font-size:11px;" aria-hidden="true"></i>Každé cvičenie aj tímovo</span>
         <span class="hpill hpill-purple"><i class="ti ti-user" style="font-size:11px;" aria-hidden="true"></i>Individuálne</span>
         <span class="hpill hpill-amber"><i class="ti ti-sparkles" style="font-size:11px;" aria-hidden="true"></i>AI klasifikácia 1–5</span>
         <span class="hpill hpill-purple"><i class="ti ti-school" style="font-size:11px;" aria-hidden="true"></i>Učiteľský prehľad</span>
@@ -325,8 +333,8 @@ body{font-family:var(--font-sans);color:var(--color-text-primary)}
     </div>
     <div class="hero-stats">
       <div class="hstat"><div class="hstat-n">10</div><div class="hstat-l">cvičení</div></div>
-      <div class="hstat"><div class="hstat-n">1</div><div class="hstat-l">tímové</div></div>
-      <div class="hstat"><div class="hstat-n">9</div><div class="hstat-l">individuálnych</div></div>
+      <div class="hstat"><div class="hstat-n">10</div><div class="hstat-l">aj tímovo</div></div>
+      <div class="hstat"><div class="hstat-n">2–4</div><div class="hstat-l">členov tímu</div></div>
       <div class="hstat"><div class="hstat-n">AI</div><div class="hstat-l">hodnotenie</div></div>
     </div>
   </div>
@@ -449,7 +457,11 @@ const EX=[
    title:"Prvé zoznámenie s kamerou a príprava na nahrávanie",
    short:"Príprava kamery",
    goal:"Priprav kameru na prvé samostatné nahrávanie — od vybalenia až po testovací záber.",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Technik kamery", "Operátor aplikácie", "Kameraman"],
+   plan:[{r:"Technik kamery",t:"nabije batériu, naformátuje microSD kartu priamo v kamere a skontroluje firmvér"},{r:"Operátor aplikácie",t:"spáruje kameru s aplikáciou Insta360 a nastaví 5.7K @ 30 fps"},{r:"Kameraman",t:"nahrá testovací záber (min. 10 s) s kamerou na neviditeľnej tyči"}],
+   goalTeam:"Pripravte kameru na prvé spoločné nahrávanie — od vybalenia až po testovací záber — a rozdeľte si pritom úlohy.",
    color:"#EEEDFE",
    tc:"#3C3489",
    ic:"ti-device-camera",
@@ -462,7 +474,11 @@ const EX=[
    title:"Princípy nakrúcania a kompozícia v 360° priestore",
    short:"Nakrúcanie a kompozícia",
    goal:"Zvládni manipuláciu s kamerou, správne použi neviditeľnú tyč (Invisible Selfie Stick) a dodrž odstup od línie švu (Stitching Line).",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Kameraman", "Režisér", "Asistent / DIT"],
+   plan:[{r:"Kameraman",t:"vedie kameru na neviditeľnej tyči a dodržiava odstup od línie švu (Stitching Line)"},{r:"Režisér",t:"navrhne trasu a kompozíciu záberu a cez živý náhľad kontroluje odstup od objektov (viac ako 50 cm)"},{r:"Asistent / DIT",t:"namontuje tyč v osi kamery, manuálne nastaví vyváženie bielej (5600 K) a skontroluje šošovky"}],
+   goalTeam:"Zvládnite spoločne manipuláciu s kamerou, správne použite neviditeľnú tyč (Invisible Selfie Stick) a dodržte odstup od línie švu (Stitching Line).",
    color:"#EEEDFE",
    tc:"#3C3489",
    ic:"ti-focus-2",
@@ -475,7 +491,11 @@ const EX=[
    title:"Import, Stitching a stabilizácia v Insta360 Studio",
    short:"Import & Stitching",
    goal:"Spracuj raw súbory .INSV na počítači, skalibruj spájanie švov a aplikuj gyroskopickú stabilizáciu.",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["DIT / import", "Operátor zošitia", "Kontrola kvality"],
+   plan:[{r:"DIT / import",t:"skopíruje a zálohuje súbory .INSV a načíta ich dvojicu do Insta360 Studio"},{r:"Operátor zošitia",t:"nastaví Optical Stitching a zarovná spoj objektívov bez duchov"},{r:"Kontrola kvality",t:"zapne FlowState Stabilization a Horizon Lock, odstráni tyč a skontroluje výsledok na celom zábere"}],
+   goalTeam:"Spracujte spoločne raw súbory .INSV na počítači, skalibrujte spájanie švov a aplikujte gyroskopickú stabilizáciu.",
    color:"#FAEEDA",
    tc:"#633806",
    ic:"ti-adjustments",
@@ -488,7 +508,11 @@ const EX=[
    title:"Reframe a animácia pohľadov v Insta360 Studio",
    short:"Reframe & Keyframes",
    goal:"Vytvor dynamické 2D video zo 360° záberu pomocou kľúčových snímok (keyframes) a AI nástrojov.",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Strihač / reframe", "Režisér pohľadu", "Operátor AI sledovania"],
+   plan:[{r:"Strihač / reframe",t:"vytvorí kľúčové snímky (keyframes): Tiny Planet na 00:00 a prechod na širokouhlý pohľad na 00:05"},{r:"Režisér pohľadu",t:"navrhne, kam sa má pohľad v čase pozerať, a kontroluje plynulosť pohybu"},{r:"Operátor AI sledovania",t:"nastaví Deep Track a interpoláciu pohybu Ease In / Out"}],
+   goalTeam:"Vytvorte spoločne dynamické 2D video zo 360° záberu pomocou kľúčových snímok (keyframes) a AI nástrojov.",
    color:"#FAEEDA",
    tc:"#633806",
    ic:"ti-crop",
@@ -501,7 +525,11 @@ const EX=[
    title:"Export a voľba kodekov z Insta360 Studio",
    short:"Export & kodeky",
    goal:"Vyexportuj prekomponované 2D video v najvyššej kvalite pre ďalšie spracovanie v strihovom programe.",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Exportný technik", "Kontrola formátov", "Správca súborov / DIT"],
+   plan:[{r:"Exportný technik",t:"nastaví Reframed Video, rozlíšenie a kodek (ProRes 422 alebo H.265, Super High) a spustí export"},{r:"Kontrola formátov",t:"overí pomer strán (16:9 alebo 9:16), rozlíšenie a bitrate hotového súboru"},{r:"Správca súborov / DIT",t:"uloží súbor do pracovného priečinka, pomenuje ho a zálohuje"}],
+   goalTeam:"Vyexportujte spoločne prekomponované 2D video v najvyššej kvalite pre ďalšie spracovanie v strihovom programe.",
    color:"#EEEDFE",
    tc:"#3C3489",
    ic:"ti-file-export",
@@ -514,7 +542,11 @@ const EX=[
    title:"Import a nastavenie VR sekvencie v Adobe Premiere Pro",
    short:"VR sekvencia v Premiere",
    goal:"Priprav projekt v Premiere Pro na prácu so 360° videom pomocou oficiálneho zásuvného modulu (plug-inu).",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Strihač", "Operátor plug-inu", "Správca projektu / DIT"],
+   plan:[{r:"Strihač",t:"vytvorí projekt a sekvenciu (1920 × 1080 alebo 3840 × 2160, 30 fps, Square Pixels)"},{r:"Operátor plug-inu",t:"aplikuje GoPro FX Reframe / Insta360 Reframe a nastaví projekciu (Equirectangular → Rectilinear)"},{r:"Správca projektu / DIT",t:"importuje súbory, drží štruktúru priečinkov a kontroluje plynulosť náhľadu v Program Monitore"}],
+   goalTeam:"Pripravte spoločne projekt v Premiere Pro na prácu so 360° videom pomocou oficiálneho zásuvného modulu (plug-inu).",
    color:"#FAEEDA",
    tc:"#633806",
    ic:"ti-movie",
@@ -527,7 +559,11 @@ const EX=[
    title:"Pokročilý reframe, kľúčovanie a prechody v Premiere Pro",
    short:"Reframe & Whip Pan",
    goal:"Vytvor komplexnú kamerovú animáciu pomocou keyframes v Effect Controls a prechod Whip Pan.",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Animátor kamery", "Strihač prechodov", "Režisér"],
+   plan:[{r:"Animátor kamery",t:"animuje parametre Yaw a Pitch pomocou keyframes a nastaví Ease In / Ease Out"},{r:"Strihač prechodov",t:"vytvorí prechod Whip Pan medzi dvoma klipmi a zapne Motion Blur"},{r:"Režisér",t:"navrhne pohyb kamery a rytmus strihu a kontroluje výsledok"}],
+   goalTeam:"Vytvorte spoločne komplexnú kamerovú animáciu pomocou keyframes v Effect Controls a prechod Whip Pan.",
    color:"#EEEDFE",
    tc:"#3C3489",
    ic:"ti-keyframes",
@@ -540,7 +576,11 @@ const EX=[
    title:"Farebné korekcie (Lumetri Color) a práca so zvukom",
    short:"Lumetri & zvuk",
    goal:"Vyrovnaj farebný profil, zosúlaď expozíciu a vyčisti zvukovú stopu 360° videa.",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Kolorista", "Zvukový technik", "Kontrola kvality"],
+   plan:[{r:"Kolorista",t:"prevedie LOG profil na Rec.709 (Input LUT) a vyrovná expozíciu v Lumetri Color"},{r:"Zvukový technik",t:"vyčistí zvuk (Essential Sound → Dialogue → Reduce Noise) a normalizuje ho na −23 LUFS"},{r:"Kontrola kvality",t:"porovná obraz pred a po úprave a skontroluje hlasitosť a synchronizáciu zvuku"}],
+   goalTeam:"Vyrovnajte spoločne farebný profil, zosúlaďte expozíciu a vyčistite zvukovú stopu 360° videa.",
    color:"#FAEEDA",
    tc:"#633806",
    ic:"ti-palette",
@@ -556,6 +596,8 @@ const EX=[
    team:true,
    defMode:"team",
    roles:["Režisér", "Kameraman", "Strihač / DIT"],
+   plan:[{r:"Režisér",t:"pripraví scenár, režíruje a cez živý náhľad kontroluje kompozíciu"},{r:"Kameraman",t:"vedie kameru na tyči a dodržiava odstupy od švu"},{r:"Strihač / DIT",t:"spravuje súbory, importuje materiál, robí reframe a montáž"}],
+   ownTeamItem:true,
    color:"#E1F5EE",
    tc:"#085041",
    ic:"ti-users",
@@ -568,7 +610,11 @@ const EX=[
    title:"Finálny export, publikovanie a vyhodnotenie s AI protokolom",
    short:"Finálny export & protokol",
    goal:"Vyexportuj finálne dielo, doplň protokol a odovzdaj ho na AI hodnotenie (0–100 bodov, známka 1–5).",
-   team:false,
+   team:true,
+   defMode:"solo",
+   roles:["Exportný technik", "Autor protokolu", "Správca odovzdania"],
+   plan:[{r:"Exportný technik",t:"vyexportuje finálne dielo z Premiere Pro (H.264 / MP4, AAC 320 kbps, 48 kHz)"},{r:"Autor protokolu",t:"napíše protokol s technickými parametrami záberu (FPS, rozlíšenie, profil)"},{r:"Správca odovzdania",t:"priloží screenshoty z Insta360 Studio a Premiere Pro a vloží odkaz na súbory na Google Drive"}],
+   goalTeam:"Vyexportujte spoločne finálne dielo, doplňte protokol a odovzdajte ho na AI hodnotenie (0–100 bodov, známka 1–5).",
    color:"#FAEEDA",
    tc:"#633806",
    ic:"ti-trophy",
@@ -583,6 +629,12 @@ const AVC=[{bg:"#EEEDFE",tc:"#3C3489"},{bg:"#E1F5EE",tc:"#085041"},{bg:"#E6F1FB"
 const GBG=['','#EAF3DE','#E6F1FB','#FAEEDA','#FAECE7','#FCEBEB'];
 const GTC=['','#27500A','#0C447C','#633806','#712B13','#791F1F'];
 const GL=['','Výborný','Chválitebný','Dobrý','Dostatočný','Nedostatočný'];
+
+// Selfcheck: v tímovom režime pribudne položka o rozdelení rolí. Cvičenie 9 ju má vo vlastnom
+// znení priamo v zozname (ownTeamItem), preto sa tam nepridáva druhá.
+const TEAM_CK='Úlohy v tíme rozdelené podľa rolí a v komentári je uvedené, kto čo urobil';
+function ckItems(ex,isTeam){return isTeam&&!ex.ownTeamItem?ex.checklist.concat([TEAM_CK]):ex.checklist;}
+function ckCount(ex,isTeam,ck){return ckItems(ex,isTeam).reduce((n,_,i)=>n+(ck&&ck[i]?1:0),0);}
 
 const LS_KEY='insta360State';
 function loadState(){
@@ -610,7 +662,7 @@ function renderSidebar(){
     const sel=S.sel===ex.id?'sel':'';
     const last=S.subs.filter(s=>s.exId===ex.id).slice(-1)[0];
     const gb=last?`<span class="badge" style="background:${GBG[last.grade]};color:${GTC[last.grade]};font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;">Zn. ${last.grade}</span>`:'';
-    const tb=ex.team?`<span class="badge bt">tím</span>`:`<span class="badge bs">solo</span>`;
+    const tb=ex.team?`<span class="badge bt">${ex.defMode==='team'?'tím / solo':'solo / tím'}</span>`:`<span class="badge bs">solo</span>`;
     return`<div class="ex-item ${sel}" onclick="selEx(${ex.id})">
       <div class="ex-dot" style="background:${ex.color};color:${ex.tc};"><i class="ti ${ex.ic}" style="font-size:13px;" aria-hidden="true"></i></div>
       <div class="ex-info">
@@ -671,8 +723,9 @@ function renderMain(){
   const mode=S.mode[ex.id];const isTeam=mode==='team';
   const mbrs=S.members[ex.id]||[];
   const ck=S.checked[ex.id]||{};
-  const ckN=Object.values(ck).filter(Boolean).length;
-  const ckT=ex.checklist.length;
+  const items=ckItems(ex,isTeam);
+  const ckN=ckCount(ex,isTeam,ck);
+  const ckT=items.length;
   const pct=Math.round(ckN/ckT*100);
 
   const prev=S.subs.filter(s=>s.exId===ex.id);
@@ -703,13 +756,19 @@ function renderMain(){
   const modeSection=ex.team?`<div class="mode-toggle">
     <button class="mode-btn ${mode==='team'?'sel-team':''}" onclick="setMode(${ex.id},'team')">
       <div class="mode-icon-wrap"><i class="ti ti-users" style="font-size:17px;" aria-hidden="true"></i></div>
-      <div><div class="mode-txt">Tímové</div><div class="mode-sub">odporúčané 3 členovia</div></div>
+      <div><div class="mode-txt">Tímové</div><div class="mode-sub">2–4 členovia, odporúčané 3</div></div>
     </button>
     <button class="mode-btn ${mode==='solo'?'sel-solo':''}" onclick="setMode(${ex.id},'solo')">
       <div class="mode-icon-wrap"><i class="ti ti-user" style="font-size:17px;" aria-hidden="true"></i></div>
       <div><div class="mode-txt">Individuálne</div><div class="mode-sub">samostatná práca</div></div>
     </button>
   </div>`:`<div class="infobanner ib-purple" style="margin-bottom:1rem;"><div class="infobanner-icon"><i class="ti ti-user" aria-hidden="true"></i></div><div class="infobanner-body"><strong>Individuálne cvičenie</strong> – vypracovávaš samostatne</div></div>`;
+
+  const planH=(isTeam&&ex.plan)?`<div class="team-plan">
+    <div class="team-plan-h"><i class="ti ti-users" aria-hidden="true"></i>Rozdelenie úloh v tíme — odporúčané roly</div>
+    ${ex.plan.map(p=>`<div class="team-plan-row"><span class="team-plan-role">${esc(p.r)}</span><span class="team-plan-task">${esc(p.t)}</span></div>`).join('')}
+    <div class="team-plan-note">Tím má 2 až 4 členov. Odovzdať stačí jednému — odovzdanie sa započíta všetkým členom. V komentári uveďte, kto čo urobil.</div>
+  </div>`:'';
 
   let membersH='';
   const takenSids=mbrs.map(m=>m.sid).filter(Boolean);
@@ -732,7 +791,7 @@ function renderMain(){
   }
   membersH=cfgBannerHtml()+membersH;
 
-  const chkH=ex.checklist.map((item,i)=>{const c=ck[i]?'ck':'';return`<div class="ck-item ${c}" onclick="togCk(${ex.id},${i})">
+  const chkH=items.map((item,i)=>{const c=ck[i]?'ck':'';return`<div class="ck-item ${c}" onclick="togCk(${ex.id},${i})">
     <input type="checkbox" ${ck[i]?'checked':''} onclick="event.stopPropagation();togCk(${ex.id},${i})" aria-label="${item}">
     <span>${item}</span>
   </div>`}).join('');
@@ -744,9 +803,9 @@ function renderMain(){
   document.getElementById('main-area').innerHTML=`<div class="form-card fi">
     <div class="form-hero-band">
       <div class="form-hero-inner">
-        <div class="fh-tag"><i class="ti ${ex.ic}" style="font-size:13px;" aria-hidden="true"></i>Cvičenie ${ex.id} · ${ex.team?'tímové':'individuálne'}</div>
+        <div class="fh-tag"><i class="ti ${ex.ic}" style="font-size:13px;" aria-hidden="true"></i>Cvičenie ${ex.id} · ${ex.team?'individuálne alebo tímové':'individuálne'}</div>
         <div class="fh-title">${ex.title}</div>
-        <div class="fh-goal">${ex.goal}</div>
+        <div class="fh-goal">${isTeam&&ex.goalTeam?ex.goalTeam:ex.goal}</div>
         <div class="fh-kw">${kw}</div>
       </div>
     </div>
@@ -757,6 +816,7 @@ function renderMain(){
       <div style="font-size:11.5px;color:var(--color-text-secondary);margin:-4px 0 12px;">Body → známka: 86–100 = 1, 70–85 = 2, 56–69 = 3, 40–55 = 4, 0–39 = 5. <a href="${BOOK}#page=${BOOK_PAGES.grading}" target="_blank" rel="noopener" style="color:#0C447C;">Tabuľka klasifikácie v učebnici (str. ${BOOK_PAGES.grading})</a></div>
       ${tutH}
       ${modeSection}
+      ${planH}
       ${membersH}
       <div class="field">
         <div class="field-label"><i class="ti ti-checkbox" style="font-size:12px;" aria-hidden="true"></i>Selfcheck - zoznam pred odovzdaním
@@ -873,8 +933,8 @@ async function handleFiles(id,input){
 function rmF(id,i){S.uploads[id].splice(i,1);persist();renderMain()}
 function resetF(id){S.checked[id]={};S.uploads[id]=[];S.comment[id]='';S.link[id]='';S.result=null;persist();renderMain()}
 
-function evidenceFallback(ex,ckN,ups,comment){
-  const totalChecks=ex.checklist.length;
+function evidenceFallback(ex,ckN,ups,comment,ckT){
+  const totalChecks=ckT||ex.checklist.length;
   const rawPct=Math.round((ckN/totalChecks)*100);
   const hasImage=ups.some(f=>f.kind==='image');
   const hasAnyFile=ups.length>0;
@@ -907,7 +967,7 @@ async function submitWork(id){
   const sids=rows.map(m=>m.sid);
   const mbrs=rows.map(m=>({name:(studentById(m.sid)||{}).name||'',role:m.role||''}));
   const comment=S.comment[id]||'';
-  const ck=S.checked[id]||{};const ckN=Object.values(ck).filter(Boolean).length;
+  const ck=S.checked[id]||{};const items=ckItems(ex,isTeam);const ckN=ckCount(ex,isTeam,ck);
   const ups=S.uploads[id]||[];
   const names=mbrs.map(m=>m.name).join(', ')||'Anonymný';
 
@@ -962,7 +1022,10 @@ FORMÁT ODPOVEDE: výhradne jeden platný JSON objekt, bez backticks, bez textu 
 - „criteria“ sú body z maxím tech 35, key 25, flow 20, doc 20.
 - „summary“: 1–2 vety (do 35 slov). „strengths“: 1–2 vety. „improvements“: 2–3 vety s konkrétnymi krokmi. Texty bez zalomení riadkov a bez rovných úvodzoviek (")  — na citáty použi „ “.`;
 
-  const sysVariable=`${isTeam?'Ide o tímovú prácu — oslovuj tím vykaním v množnom čísle a zohľadni aj spoluprácu a rozdelenie rolí, nielen techniku.':'Ide o individuálnu prácu — oslovuj žiaka tykaním a hodnoť samostatné zvládnutie postupu.'}
+  const teamPrompt=isTeam?`Ide o tímovú prácu — oslovuj tím vykaním v množnom čísle. Hodnotenie je spoločné pre celý tím, členov nehodnoť samostatne.
+Roly tímu pri tomto cvičení: ${(ex.plan||[]).map(p=>`${p.r} — ${p.t}`).join('; ')}.
+V kritériu flow zohľadni aj to, či komentár zachytáva, kto z tímu čo urobil, a či je rozdelenie úloh rozumné. Ak komentár rozdelenie úloh vôbec neuvádza, kritérium flow hodnoť najviac na 70 % jeho maxima. Kritériá tech, key a doc hodnoť podľa dôkazov rovnako ako pri jednotlivcovi.`:'';
+  const sysVariable=`${isTeam?teamPrompt:'Ide o individuálnu prácu — oslovuj žiaka tykaním a hodnoť samostatné zvládnutie postupu.'}
 Cvičenie ${ex.id}: ${ex.title}
 Referenčné údaje k tomuto cvičeniu (podľa učebnice; slúžia len na overenie správnosti): ${ex.ref}`;
 
@@ -974,8 +1037,8 @@ Referenčné údaje k tomuto cvičeniu (podľa učebnice; slúžia len na overen
   const checklistText=`Cvičenie ${id}: ${ex.title}
 Zadanie: ${ex.goal}
 Typ: ${isTeam?`Tím (${mbrs.length} členov: ${mbrs.map(m=>m.name+(m.role?` (${m.role})`:'')).join(', ')})`:`Individuálne (${names})`}
-Selfcheck (POZOR: toto je len tvrdenie žiaka, nie overený fakt): ${ckN}/${ex.checklist.length}
-${ex.checklist.map((t,i)=>`${ck[i]?'✓ (tvrdí, že splnené)':'✗ (nesplnené)'} ${t}`).join('\n')}
+Selfcheck (POZOR: toto je len tvrdenie žiaka, nie overený fakt): ${ckN}/${items.length}
+${items.map((t,i)=>`${ck[i]?'✓ (tvrdí, že splnené)':'✗ (nesplnené)'} ${t}`).join('\n')}
 Priložené obrázky/screenshoty (${imageFiles.length}): ${imageFiles.length?imageFiles.map(f=>f.name).join(', ')+' — tieto obrázky nasledujú nižšie v správe, skutočne si ich pozri':'žiadne'}
 Priložené videá a iné neanalyzovateľné súbory (${otherFiles.length}): ${otherFiles.length?otherFiles.map(f=>`${f.name} [${fileKindLabel(f).split(' — ')[0]}]`).join(', '):'žiadne'} — obsah týchto súborov NEVIDÍŠ, hodnoť ich len ako formálny dôkaz existencie.
 Komentár žiaka: ${comment}
@@ -988,7 +1051,7 @@ Over, či je komentár a Selfcheck reálne podložený, a hodnoť presne podľa 
   });
 
   const roles={};if(isTeam)rows.forEach(m=>{if(m.role)roles[m.sid]=m.role;});
-  const meta={classId:S.cfg.cls.id,exId:id,members:sids,roles,ckN,ckT:ex.checklist.length,fc:ups.length,comm:comment,link:(S.link[id]||'').trim()};
+  const meta={classId:S.cfg.cls.id,exId:id,members:sids,roles,ckN,ckT:items.length,fc:ups.length,comm:comment,link:(S.link[id]||'').trim()};
   // Kontrola veľkosti požiadavky (Vercel: max. ~4,5 MB). Ak by bola väčšia, odošle sa menej obrázkov.
   let imgSize=0;
   for(let i=userContent.length-1;i>=1;i--){imgSize+=userContent[i].source.data.length;}
@@ -1015,7 +1078,7 @@ Over, či je komentár a Selfcheck reálne podložený, a hodnoť presne podľa 
     saveStatus=d.saved?'saved':'nodb';
   }catch(e){
     console.warn('AI hodnotenie zlyhalo, používam lokálny fallback:',e);
-    p=evidenceFallback(ex,ckN,ups,comment);
+    p=evidenceFallback(ex,ckN,ups,comment,items.length);
   }
   saveR(id,p,names,mbrs,isTeam,ckN,ups.length,saveStatus);
   if(btn)btn.disabled=false;
@@ -1023,7 +1086,7 @@ Over, či je komentár a Selfcheck reálne podložený, a hodnoť presne podľa 
 
 function saveR(id,p,names,mbrs,isTeam,ckN,fc,saveStatus){
   const ex=EX.find(e=>e.id===id);
-  const res={exId:id,names,mbrs,isTeam,grade:Math.max(1,Math.min(5,parseInt(p.grade)||3)),total:Math.max(0,Math.min(100,parseInt(p.total)||0)),criteria:p.criteria||{},strengths:p.strengths||'',improvements:p.improvements||'',summary:p.summary||'',ckN,ckT:ex.checklist.length,fc,ts:new Date().toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'}),date:new Date().toLocaleDateString('sk-SK'),saveStatus};
+  const res={exId:id,names,mbrs,isTeam,grade:Math.max(1,Math.min(5,parseInt(p.grade)||3)),total:Math.max(0,Math.min(100,parseInt(p.total)||0)),criteria:p.criteria||{},strengths:p.strengths||'',improvements:p.improvements||'',summary:p.summary||'',ckN,ckT:ckItems(ex,isTeam).length,fc,ts:new Date().toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'}),date:new Date().toLocaleDateString('sk-SK'),saveStatus};
   S.subs.push(res);S.result=res;persist();renderResult(res);renderSidebar();
 }
 

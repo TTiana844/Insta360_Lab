@@ -30,16 +30,16 @@ a na **celú učebnicu**; hlavička appky má dlaždicu „Celá učebnica (PDF)
 
 | Cv. | Téma | Str. v PDF | Typ |
 |---|---|---|---|
-| 1 | Príprava kamery a prvý testovací záber | 4 | individuálne |
-| 2 | Nakrúcanie a kompozícia v 360° priestore | 8 | individuálne |
-| 3 | Import, Stitching a stabilizácia v Insta360 Studio | 11 | individuálne |
-| 4 | Reframe a Keyframes v Insta360 Studio | 13 | individuálne |
-| 5 | Export a voľba kodekov | 15 | individuálne |
-| 6 | VR sekvencia v Premiere Pro | 17 | individuálne |
-| 7 | Pokročilý reframe, keyframes a Whip Pan | 19 | individuálne |
-| 8 | Lumetri Color a zvuk | 20 | individuálne |
-| 9 | Tímový projekt (Režisér, Kameraman, Strihač / DIT) | 22 | **tímové** (možno aj individuálne) |
-| 10 | Finálny export a protokol | 24 | individuálne |
+| 1 | Príprava kamery a prvý testovací záber | 4 | individuálne alebo tímové |
+| 2 | Nakrúcanie a kompozícia v 360° priestore | 8 | individuálne alebo tímové |
+| 3 | Import, Stitching a stabilizácia v Insta360 Studio | 11 | individuálne alebo tímové |
+| 4 | Reframe a Keyframes v Insta360 Studio | 13 | individuálne alebo tímové |
+| 5 | Export a voľba kodekov | 15 | individuálne alebo tímové |
+| 6 | VR sekvencia v Premiere Pro | 17 | individuálne alebo tímové |
+| 7 | Pokročilý reframe, keyframes a Whip Pan | 19 | individuálne alebo tímové |
+| 8 | Lumetri Color a zvuk | 20 | individuálne alebo tímové |
+| 9 | Tímový projekt (Režisér, Kameraman, Strihač / DIT) | 22 | **tímové** (predvolene), možno aj individuálne |
+| 10 | Finálny export a protokol | 24 | individuálne alebo tímové |
 
 Slovník pojmov je na str. 1, schémy zapojenia na str. 2, rozloženie okien programov na str. 3
 a tabuľka klasifikácie na str. 25. Ak PDF premenuješ, uprav konštantu `BOOK` v `index.html`;
@@ -49,11 +49,48 @@ Hodnotiace kritériá sú rovnaké pre všetky cvičenia (podľa učebnice): tec
 kvalita a kompozícia 25 b., postup a workflow 20 b., protokol a dokumentácia 20 b.
 Známka: 86–100 = 1, 70–85 = 2, 56–69 = 3, 40–55 = 4, 0–39 = 5.
 
+## Tímová práca vo všetkých cvičeniach
+
+Každé z 10 cvičení sa dá robiť **samostatne alebo v tíme** (2 až 4 členovia, odporúčané 3).
+Žiak si režim prepne tlačidlami *Tímové / Individuálne* nad formulárom. Predvolene je
+cvičenie 9 tímové a ostatné individuálne.
+
+V tímovom režime appka ukáže **rozdelenie úloh** (3 odporúčané roly a čo každá robí), tímové
+znenie zadania a pridá do Selfchecku položku *„Úlohy v tíme rozdelené podľa rolí a v komentári je
+uvedené, kto čo urobil“* (cvičenie 9 ju má vo vlastnom znení). Pri prepnutí späť na individuálne
+režim položka zmizne a nezapočíta sa.
+
+| Cv. | Roly v tíme |
+|---|---|
+| 1 | Technik kamery · Operátor aplikácie · Kameraman |
+| 2 | Kameraman · Režisér · Asistent / DIT |
+| 3 | DIT / import · Operátor zošitia · Kontrola kvality |
+| 4 | Strihač / reframe · Režisér pohľadu · Operátor AI sledovania |
+| 5 | Exportný technik · Kontrola formátov · Správca súborov / DIT |
+| 6 | Strihač · Operátor plug-inu · Správca projektu / DIT |
+| 7 | Animátor kamery · Strihač prechodov · Režisér |
+| 8 | Kolorista · Zvukový technik · Kontrola kvality |
+| 9 | Režisér · Kameraman · Strihač / DIT |
+| 10 | Exportný technik · Autor protokolu · Správca odovzdania |
+
+- **Jedno odovzdanie za celý tím** — započíta sa každému členovi, odovzdať ho stačí jednému.
+  Tím musí mať pri odovzdaní aspoň 2 členov.
+- **Hodnotenie je spoločné pre celý tím.** AI pri tíme vyká, pozná roly a ich úlohy a v kritériu
+  „postup a workflow“ posudzuje aj to, či komentár uvádza, kto čo urobil (ak rozdelenie úloh
+  v komentári vôbec chýba, je toto kritérium obmedzené na 70 % maxima). Technické kritériá a
+  dokumentáciu hodnotí podľa dôkazov rovnako ako pri jednotlivcovi.
+- **Učiteľ** vidí v tabuľke značku 👥, v detaile členov aj s rolami a môže zadať **ručnú známku
+  len jednému členovi** (nerovný podiel práce).
+- Ak žiak odovzdá to isté cvičenie samostatne aj v tíme, do tabuľky sa započíta lepší výsledok
+  (bunka je označená ⚠).
+- Server nemusel meniť nič — už predtým prijímal 1 až 4 členov a roly pri každom cvičení.
+  Roly a ich popisy sú v poli `EX` v `index.html` (`roles`, `plan`, `goalTeam`).
+
 ## Ako to funguje (odovzdávanie do databázy)
 
 - **Trieda a žiaci:** učiteľ vloží zoznam mien (max. 40) a tým vytvorí triedu. Žiaci si pri
-  odovzdávaní vyberú meno zo zoznamu — nepíšu ho, preto sa mená nerozchádzajú. Tím (cvičenie 9)
-  sa skladá z mien zo zoznamu s rolami Režisér, Kameraman, Strihač / DIT.
+  odovzdávaní vyberú meno zo zoznamu — nepíšu ho, preto sa mená nerozchádzajú. Tím sa skladá
+  z 2 až 4 mien zo zoznamu, každý člen má rolu z ponuky daného cvičenia (pozri „Tímová práca“).
 - **Jedno odovzdanie = jedno cvičenie pre jedného žiaka alebo pre celý tím.** Tímové odovzdanie
   sa započíta každému členovi; odovzdať ho stačí jednému.
 - **Povinné pri odovzdaní:** meno zo zoznamu, aspoň jeden súbor (screenshot alebo video),
