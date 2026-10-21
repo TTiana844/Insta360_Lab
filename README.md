@@ -1,4 +1,4 @@
-# Insta360 Lab — odovzdávací systém s AI hodnotením
+ # Insta360 Lab — odovzdávací systém s AI hodnotením
 
 Statická webová aplikácia (`index.html`) + Vercel serverless funkcie v `api/`, ktoré
 bezpečne volajú Anthropic API, hodnotenie ukladajú do databázy a poskytujú učiteľovi
