@@ -381,7 +381,7 @@ body{font-family:var(--font-sans);color:var(--color-text-primary)}
       <div class="field"><div class="field-label">Zoznam žiakov — jeden na riadok (max. 40) <span id="cls-count" style="font-weight:400;"></span></div>
         <textarea id="cls-lines" rows="14" style="min-height:260px;" oninput="updateClassCount()" placeholder="Novák Ján&#10;Kováčová Eva&#10;…"></textarea>
         <div id="cls-hint" style="font-size:11.5px;color:var(--color-text-secondary);margin-top:4px;"></div></div>
-      <label id="cls-active-wrap" style="display:flex;gap:7px;font-size:13px;align-items:center;cursor:pointer;margin-bottom:6px;"><input type="checkbox" id="cls-active" checked> Nastaviť ako aktívnu triedu (túto uvidia žiaci pri odovzdávaní)</label>
+      <label id="cls-active-wrap" style="display:flex;gap:7px;font-size:13px;align-items:center;cursor:pointer;margin-bottom:6px;"><input type="checkbox" id="cls-active" checked> Nastaviť ako aktívnu triedu (platí pre ostatné projekty; žiaci Insta360 sa prihlasujú kódom triedy)</label>
       <div class="btn-row" style="justify-content:flex-end;">
         <button type="button" class="btn-s" id="cls-del" onclick="deleteClassDialog()" style="display:none;margin-right:auto;"><i class="ti ti-trash"></i> Zmazať triedu</button>
         <button type="button" class="btn-s" onclick="closeClassDialog()">Zrušiť</button>
@@ -648,7 +648,7 @@ let S=loadState();
 function persist(){
   try{
     // Priložené súbory (obrázky v base64) sa neukladajú — zaplnili by localStorage a stratili by sa komentáre.
-    const toSave={mode:S.mode,checked:S.checked,comment:S.comment,link:S.link,subs:S.subs,tutOpen:S.tutOpen};
+    const toSave={mode:S.mode,checked:S.checked,comment:S.comment,link:S.link,subs:S.subs,tutOpen:S.tutOpen,code:S.code||''};
     localStorage.setItem(LS_KEY,JSON.stringify(toSave));
   }catch(e){console.warn('Nepodarilo sa uložiť stav (localStorage plné alebo nedostupné):',e);}
 }
@@ -688,15 +688,34 @@ function selEx(id){
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 // Aktívna trieda a zoznam mien (verejné, bez hesla)
+// Žiak zadá KÓD TRIEDY od učiteľa; server vráti zoznam mien len jeho triedy.
+function normCode(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);}
 async function loadConfig(){
-  try{const r=await fetch('/api/config',{cache:'no-store'});S.cfg=await r.json();}
+  const code=normCode(S.code);
+  if(!code){S.cfg={ok:false,reason:'need_code'};if(S.sel)renderMain();return;}
+  try{const r=await fetch('/api/config?code='+encodeURIComponent(code),{cache:'no-store'});S.cfg=await r.json();}
   catch(e){S.cfg={ok:false,reason:'offline'};}
+  if(S.cfg&&S.cfg.reason==='bad_code'){S.code='';persist();}   // neplatný kód sa nezapamätá
   if(S.sel)renderMain();
+}
+function submitCode(){
+  const el=document.getElementById('code-in');
+  const c=normCode(el?el.value:'');
+  if(c.length<4){alert('Zadaj kód triedy, ktorý ti dal učiteľ.');return;}
+  S.code=c;S.members={};S.cfg=null;persist();renderMain();loadConfig();
+}
+function changeClass(){
+  S.code='';S.members={};S.subs=[];S.result=null;S.cfg={ok:false,reason:'need_code'};persist();
+  renderSidebar();renderMain();
 }
 function studentById(sid){return (S.cfg&&S.cfg.cls?S.cfg.cls.students:[]).find(s=>s.id===sid)||null;}
 function cfgBannerHtml(){
   if(!S.cfg)return`<div class="infobanner ib-purple"><div class="infobanner-icon"><i class="ti ti-loader" aria-hidden="true"></i></div><div class="infobanner-body">Načítavam zoznam triedy…</div></div>`;
-  if(S.cfg.ok)return'';
+  if(S.cfg.ok)return`<div style="font-size:12.5px;color:var(--color-text-secondary);margin-bottom:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><i class="ti ti-school" aria-hidden="true"></i> Trieda: <strong>${esc(S.cfg.cls.name)}</strong> <button type="button" class="btn-s" style="padding:3px 10px;font-size:12px;" onclick="changeClass()">Zmeniť triedu</button></div>`;
+  if(S.cfg.reason==='need_code'||S.cfg.reason==='bad_code'){
+    const err=S.cfg.reason==='bad_code'?'<div style="color:#b3261e;font-size:12.5px;margin-bottom:6px;">Tento kód triedy nesedí. Skontroluj ho a skús znova.</div>':'';
+    return`<div class="infobanner ib-purple"><div class="infobanner-icon"><i class="ti ti-key" aria-hidden="true"></i></div><div class="infobanner-body"><strong>Zadaj kód svojej triedy</strong> (dá ti ho učiteľ). Potom sa ti zobrazí zoznam tvojej triedy.${err}<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"><input type="text" id="code-in" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="napr. K7M2QX" style="max-width:170px;text-transform:uppercase;letter-spacing:2px;" onkeydown="if(event.key==='Enter')submitCode()"><button type="button" class="btn-p" style="padding:8px 16px;font-size:13px;" onclick="submitCode()">Potvrdiť</button></div></div></div>`;
+  }
   const msg=S.cfg.reason==='no_class'?'Učiteľ zatiaľ nenastavil triedu — odovzdávanie bude možné, až keď ju vytvorí.'
     :S.cfg.reason==='no_db'?'Server nemá pripojenú databázu — odovzdanie sa neuloží u učiteľa. Povedz to učiteľovi.'
     :'Nepodarilo sa načítať zoznam triedy. Skontroluj pripojenie a obnov stránku.';
@@ -1051,7 +1070,7 @@ Over, či je komentár a Selfcheck reálne podložený, a hodnoť presne podľa 
   });
 
   const roles={};if(isTeam)rows.forEach(m=>{if(m.role)roles[m.sid]=m.role;});
-  const meta={classId:S.cfg.cls.id,exId:id,members:sids,roles,ckN,ckT:items.length,fc:ups.length,comm:comment,link:(S.link[id]||'').trim()};
+  const meta={classId:S.cfg.cls.id,code:normCode(S.code),exId:id,members:sids,roles,ckN,ckT:items.length,fc:ups.length,comm:comment,link:(S.link[id]||'').trim()};
   // Kontrola veľkosti požiadavky (Vercel: max. ~4,5 MB). Ak by bola väčšia, odošle sa menej obrázkov.
   let imgSize=0;
   for(let i=userContent.length-1;i>=1;i--){imgSize+=userContent[i].source.data.length;}
@@ -1219,6 +1238,7 @@ function renderTeacher(){
       ${d.cls?`<button class="btn-s" type="button" onclick="exportCsv()"><i class="ti ti-file-spreadsheet"></i> Export do CSV</button>`:''}
       <button class="btn-s" type="button" onclick="teacherLogout()"><i class="ti ti-logout"></i> Odhlásiť</button>
     </div>
+    ${d.cls&&d.cls.code?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px;font-size:13px;"><span><i class="ti ti-key"></i> Kód triedy pre žiakov:</span><strong style="font-size:18px;letter-spacing:3px;">${esc(d.cls.code)}</strong><button class="btn-s" type="button" onclick="copyCode()"><i class="ti ti-copy"></i> Kopírovať</button><button class="btn-s" type="button" onclick="newClassCode()"><i class="ti ti-refresh"></i> Nový kód</button></div>`:''}
     ${T.err?`<div class="save-note sn-bad" style="margin-bottom:10px;">${esc(T.err)}</div>`:''}`;
 
   if(!d.cls){
@@ -1372,6 +1392,15 @@ async function deleteClassDialog(){
   catch(e){alert(e.message);}
 }
 
+function copyCode(){
+  const c=T.data&&T.data.cls&&T.data.cls.code;if(!c)return;
+  if(navigator.clipboard)navigator.clipboard.writeText(c).catch(()=>{});
+}
+async function newClassCode(){
+  if(!confirm('Vytvoriť nový kód triedy? Starý kód prestane platiť a žiaci budú musieť zadať nový.'))return;
+  try{await tApi('newCode',{classId:T.data.cls.id});await loadTeacher();}
+  catch(e){alert(e.message);}
+}
 async function setActiveClass(){
   try{await tApi('setActive',{classId:T.data.cls.id});await loadTeacher();}
   catch(e){alert(e.message);}
