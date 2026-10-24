@@ -3,7 +3,7 @@
 // Jedna funkcia, viac akcií: { action, password, ... }
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { dbConfigured, dbEnvNames, cmd, hgetall, getJSON, setJSON, PROJECT, subsKey, ovrKey } from "./_db.js";
+import { dbConfigured, dbEnvNames, cmd, hgetall, getJSON, setJSON, newUniqueCode, PROJECT, subsKey, ovrKey } from "./_db.js";
 
 const EX_IDS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const MAX_STUDENTS = 40;
@@ -79,6 +79,8 @@ export default async function handler(req, res) {
           res.status(404).json({ error: "Trieda neexistuje." });
           return;
         }
+        // Staršia trieda bez kódu dostane kód pri prvom otvorení
+        if (!cls.code) { cls.code = await newUniqueCode(); await setJSON(`class:${wanted}`, cls); }
         const subs = Object.entries(parseValues(await hgetall(subsKey(wanted)))).map(([key, rec]) => ({ key, ...rec }));
         const ovr = parseValues(await hgetall(ovrKey(wanted)));
         res.status(200).json({ project: PROJECT, projects, classes, activeId, cls, subs, ovr });
@@ -98,18 +100,31 @@ export default async function handler(req, res) {
 
         let id = body.id;
         let createdAt = Date.now();
+        let code = null;
         if (id) {
           if (!okClassId(id)) { res.status(400).json({ error: "Neplatné id triedy." }); return; }
           const old = await getJSON(`class:${id}`);
           if (!old) { res.status(404).json({ error: "Trieda neexistuje." }); return; }
           createdAt = old.createdAt;
+          code = old.code || null;
         } else {
           id = "c" + Date.now().toString(36);
         }
-        await setJSON(`class:${id}`, { id, name, students, createdAt });
+        if (!code) code = await newUniqueCode();
+        await setJSON(`class:${id}`, { id, name, students, createdAt, code });
         await cmd("SADD", "classes", id);
         if (!body.id && body.setActive !== false) await cmd("SET", "cfg:active", id);
         res.status(200).json({ ok: true, id });
+        return;
+      }
+
+      case "newCode": {
+        if (!okClassId(body.classId)) { res.status(400).json({ error: "Neplatné id triedy." }); return; }
+        const c = await getJSON(`class:${body.classId}`);
+        if (!c) { res.status(404).json({ error: "Trieda neexistuje." }); return; }
+        c.code = await newUniqueCode();
+        await setJSON(`class:${c.id}`, c);
+        res.status(200).json({ ok: true, code: c.code });
         return;
       }
 

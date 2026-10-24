@@ -1,8 +1,11 @@
 // /api/config.js
-// Verejná (bez hesla) konfigurácia pre žiakov: aktívna trieda a zoznam mien na výber.
-// Vracia len id a mená — žiadne známky ani odovzdania.
+// Verejná (bez hesla) konfigurácia pre žiakov. Žiak pošle KÓD TRIEDY (?code=…) a dostane
+// zoznam mien len tej triedy, ku ktorej kód patrí. Bez kódu sa nevráti žiadne meno ani
+// názov triedy. Vracia len id a mená — žiadne známky ani odovzdania.
 
-import { dbConfigured, getActiveClass } from "./_db.js";
+import { dbConfigured, findClassByCode, normCode } from "./_db.js";
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -11,9 +14,15 @@ export default async function handler(req, res) {
     return;
   }
   try {
-    const cls = await getActiveClass();
+    const code = normCode(req.query && req.query.code);
+    if (!code) {
+      res.status(200).json({ ok: false, reason: "need_code" });
+      return;
+    }
+    const cls = await findClassByCode(code);
     if (!cls) {
-      res.status(200).json({ ok: false, reason: "no_class" });
+      await sleep(500); // spomalí hádanie kódu
+      res.status(200).json({ ok: false, reason: "bad_code" });
       return;
     }
     res.status(200).json({

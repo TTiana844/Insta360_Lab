@@ -11,7 +11,7 @@
 //  - výstup je obmedzený na MAX_OUT_TOKENS, vstup na max. 4 obrázky a pevný limit textu,
 //  - systémový prompt a správa sa pred odoslaním čistia (len text + obrázky).
 
-import { dbConfigured, cmd, getActiveClass, PROJECT, subsKey } from "./_db.js";
+import { dbConfigured, cmd, findClassByCode, PROJECT, subsKey } from "./_db.js";
 
 // Dlhšie okno pre analýzu obrázkov (Vercel predvolene býva kratšie)
 export const config = { maxDuration: 30 };
@@ -47,10 +47,11 @@ async function resolveMeta(meta) {
   const exId = String(meta.exId);
   if (!EX_IDS.includes(exId)) return { error: "Neznáme cvičenie.", status: 400 };
 
-  const cls = await getActiveClass();
-  if (!cls) return { error: "Učiteľ zatiaľ nenastavil aktívnu triedu.", status: 409 };
+  // Trieda sa určuje podľa kódu triedy, ktorý žiak zadal (nie podľa „aktívnej“ triedy)
+  const cls = await findClassByCode(meta.code);
+  if (!cls) return { error: "Kód triedy nie je platný alebo sa zmenil. Zadaj kód triedy znova.", status: 409 };
   if (String(meta.classId) !== cls.id) {
-    return { error: "Trieda sa medzitým zmenila. Obnov stránku (F5) a vyber sa znova.", status: 409 };
+    return { error: "Trieda sa medzitým zmenila. Obnov stránku (F5) a zadaj kód triedy znova.", status: 409 };
   }
 
   const ids = Array.isArray(meta.members) ? [...new Set(meta.members.map(String))] : [];

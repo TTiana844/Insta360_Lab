@@ -8,7 +8,8 @@
 // Kľúče v databáze:
 //   cfg:active        -> id aktívnej triedy (text)
 //   classes           -> množina id všetkých tried
-//   class:<id>        -> JSON { id, name, students:[{id:"s01", name:"..."}], createdAt }
+//   class:<id>        -> JSON { id, name, students:[{id:"s01", name:"..."}], createdAt, code }
+//                        (code = kód triedy, ktorým sa žiaci prihlasujú do svojej triedy)
 //   projects          -> množina projektov, ktoré používajú túto databázu (mixpult, launchpad, midikeys, insta360, …)
 //   subs:<projekt>:<id> -> hash: "<cvičenie>|<s01+s04>" -> JSON { exId, members, attempts:[...] }
 //   ovr:<projekt>:<id>  -> hash: "<s01>|<cvičenie>" -> JSON { grade, note }  (ručná známka učiteľa)
@@ -16,6 +17,8 @@
 // Zoznamy tried (classes, class:<id>, cfg:active) sú ZDIEĽANÉ medzi projektmi, ak viaceré
 // aplikácie používajú tú istú databázu — zoznam žiakov stačí vložiť raz. Odovzdania a ručné
 // známky sú oddelené podľa projektu (konštanta PROJECT nižšie).
+
+import { randomInt } from "node:crypto";
 
 export const PROJECT = "insta360";
 export const subsKey = id => `subs:${PROJECT}:${id}`;
@@ -87,4 +90,31 @@ export const setJSON = (key, val) => cmd("SET", key, JSON.stringify(val));
 export async function getActiveClass() {
   const id = await cmd("GET", "cfg:active");
   return id ? await getJSON(`class:${id}`) : null;
+}
+
+// ---------- Kód triedy ----------
+// Žiak zadá kód od učiteľa a server mu vráti zoznam mien LEN tej triedy, ku ktorej kód patrí.
+// Abeceda bez zameniteľných znakov (bez 0/O, 1/I).
+const CODE_ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const normCode = v => String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+
+export async function allClasses() {
+  const ids = (await cmd("SMEMBERS", "classes")) || [];
+  const list = await Promise.all(ids.map(id => getJSON(`class:${id}`)));
+  return list.filter(Boolean);
+}
+
+export async function findClassByCode(code) {
+  const c = normCode(code);
+  if (c.length < 4) return null;
+  return (await allClasses()).find(x => x.code && normCode(x.code) === c) || null;
+}
+
+export async function newUniqueCode() {
+  const used = new Set((await allClasses()).map(c => normCode(c.code)));
+  for (;;) {
+    let s = "";
+    for (let i = 0; i < 6; i++) s += CODE_ALPHA[randomInt(CODE_ALPHA.length)];
+    if (!used.has(s)) return s;
+  }
 }
