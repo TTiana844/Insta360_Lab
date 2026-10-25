@@ -1,4 +1,4 @@
- # Insta360 Lab — odovzdávací systém s AI hodnotením
+# Insta360 Lab — odovzdávací systém s AI hodnotením
 
 Statická webová aplikácia (`index.html`) + Vercel serverless funkcie v `api/`, ktoré
 bezpečne volajú Anthropic API, hodnotenie ukladajú do databázy a poskytujú učiteľovi
@@ -88,8 +88,12 @@ režim položka zmizne a nezapočíta sa.
 
 ## Ako to funguje (odovzdávanie do databázy)
 
-- **Trieda a žiaci:** učiteľ vloží zoznam mien (max. 40) a tým vytvorí triedu. Žiaci si pri
-  odovzdávaní vyberú meno zo zoznamu — nepíšu ho, preto sa mená nerozchádzajú. Tím sa skladá
+- **Trieda a žiaci:** učiteľ vloží zoznam mien (max. 40) a tým vytvorí triedu. Každá trieda má
+  **kód triedy** (6 znakov, zobrazený v Učiteľskom prehľade, tlačidlo „Nový kód“). Žiak ho zadá
+  raz (prehliadač si ho zapamätá, v appke je „Zmeniť triedu“) a uvidí **zoznam mien len svojej
+  triedy** — zoznamy ostatných tried ani ich názvy nevidí. Môžu tak naraz pracovať napr. prváci
+  aj štvrtáci, „aktívnu triedu“ netreba prepínať. Server pri odovzdaní overí, že kód aj členovia
+  patria do tej istej triedy. Žiaci si vyberú meno zo zoznamu — nepíšu ho, preto sa mená nerozchádzajú. Tím sa skladá
   z 2 až 4 mien zo zoznamu, každý člen má rolu z ponuky daného cvičenia (pozri „Tímová práca“).
 - **Jedno odovzdanie = jedno cvičenie pre jedného žiaka alebo pre celý tím.** Tímové odovzdanie
   sa započíta každému členovi; odovzdať ho stačí jednému.

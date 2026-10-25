@@ -702,11 +702,11 @@ function submitCode(){
   const el=document.getElementById('code-in');
   const c=normCode(el?el.value:'');
   if(c.length<4){alert('Zadaj kód triedy, ktorý ti dal učiteľ.');return;}
-  S.code=c;S.members={};S.cfg=null;persist();renderMain();loadConfig();
+  S.code=c;S.members={};S.cfg=null;persist();if(S.sel)selEx(S.sel);else renderMain();loadConfig();
 }
 function changeClass(){
   S.code='';S.members={};S.subs=[];S.result=null;S.cfg={ok:false,reason:'need_code'};persist();
-  renderSidebar();renderMain();
+  if(S.sel)selEx(S.sel);else{renderSidebar();renderMain();}
 }
 function studentById(sid){return (S.cfg&&S.cfg.cls?S.cfg.cls.students:[]).find(s=>s.id===sid)||null;}
 function cfgBannerHtml(){
