@@ -20,11 +20,11 @@ const TZ = "Europe/Bratislava";
 const EX_IDS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 const MODEL = process.env.EVAL_MODEL || "claude-haiku-4-5-20251001";
-const MAX_OUT_TOKENS = 1000;      // JSON so 4 číslami + 3 krátkymi textami má zvyčajne 300–500 tokenov
-const MAX_IMAGES = 4;             // viac obrázkov len predražuje vstup, nie hodnotenie
+const MAX_OUT_TOKENS = 3000;      // JSON so 4 číslami + 3 krátkymi textami má zvyčajne 300–500 tokenov
+const MAX_IMAGES = 6;             // viac obrázkov len predražuje vstup, nie hodnotenie
 const MAX_IMAGE_CHARS = 1_600_000; // base64 znakov na jeden obrázok (klient ich zmenšuje na ~0,3 MB)
 const MAX_SYSTEM_CHARS = 14000;
-const MAX_TEXT_CHARS = 8000;
+const MAX_TEXT_CHARS = 10000;
 const IMG_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 // Pevné kritériá Insta360 Lab (rovnaké pre všetky cvičenia, súčet 100 b.)
