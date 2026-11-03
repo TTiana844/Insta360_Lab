@@ -8,19 +8,27 @@
 //
 // Náklady a bezpečnosť:
 //  - model určuje SERVER (premenná EVAL_MODEL, predvolene Haiku 4.5), nie prehliadač,
-//  - výstup je obmedzený na MAX_OUT_TOKENS, vstup na max. 4 obrázky a pevný limit textu,
+//  - výstup je obmedzený na MAX_OUT_TOKENS, vstup na max. 6 obrázkov a pevný limit textu,
 //  - systémový prompt a správa sa pred odoslaním čistia (len text + obrázky).
+//
+// Spoľahlivosť odpovede AI (oprava chyby „bad_json“):
+//  - AI hodnotenie odovzdáva cez nástroj (tool_choice), takže API vráti hotový objekt a nezáleží
+//    na tom, či by sa text s úvodzovkami alebo zalomeniami riadkov dal prečítať ako JSON,
+//  - ak aj tak príde text, pokúsi sa ho opraviť (zalomenia riadkov, úvodzovky, čiarky),
+//  - pri nečitateľnej alebo odrezanej odpovedi sa volanie jedenkrát zopakuje s väčším limitom,
+//  - pri 429 / 5xx / 529 od Anthropicu sa volanie jedenkrát zopakuje.
 
 import { dbConfigured, cmd, findClassByCode, PROJECT, subsKey } from "./_db.js";
 
-// Dlhšie okno pre analýzu obrázkov (Vercel predvolene býva kratšie)
-export const config = { maxDuration: 30 };
+// Dlhšie okno: analýza obrázkov + prípadné jedno opakovanie volania
+export const config = { maxDuration: 60 };
 
 const TZ = "Europe/Bratislava";
 const EX_IDS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 const MODEL = process.env.EVAL_MODEL || "claude-haiku-4-5-20251001";
-const MAX_OUT_TOKENS = 3000;      // JSON so 4 číslami + 3 krátkymi textami má zvyčajne 300–500 tokenov
+const MAX_OUT_TOKENS = 3000;      // slovenský text je „drahý“ na tokeny; 3 texty + 4 čísla = ~700–1500 tokenov
+const RETRY_OUT_TOKENS = 4500;    // pri opakovaní po odrezanej / nečitateľnej odpovedi
 const MAX_IMAGES = 6;             // viac obrázkov len predražuje vstup, nie hodnotenie
 const MAX_IMAGE_CHARS = 1_600_000; // base64 znakov na jeden obrázok (klient ich zmenšuje na ~0,3 MB)
 const MAX_SYSTEM_CHARS = 14000;
@@ -31,6 +39,33 @@ const IMG_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const CRIT_MAX = { tech: 35, key: 25, flow: 20, doc: 20 };
 // Hranice známok podľa tabuľky klasifikácie v učebnici
 const gradeFor = t => (t >= 86 ? 1 : t >= 70 ? 2 : t >= 56 ? 3 : t >= 40 ? 4 : 5);
+
+// Nástroj, ktorým AI odovzdá hodnotenie. Pri vynútenom tool_choice vráti API hotový objekt.
+const EVAL_TOOL = {
+  name: "submit_evaluation",
+  description: "Odošle hotové hodnotenie žiackeho odovzdania.",
+  input_schema: {
+    type: "object",
+    properties: {
+      criteria: {
+        type: "object",
+        description: "Body za jednotlivé kritériá (celé čísla v rozsahu 0 až maximum kritéria).",
+        properties: {
+          tech: { type: "integer", minimum: 0, maximum: CRIT_MAX.tech },
+          key: { type: "integer", minimum: 0, maximum: CRIT_MAX.key },
+          flow: { type: "integer", minimum: 0, maximum: CRIT_MAX.flow },
+          doc: { type: "integer", minimum: 0, maximum: CRIT_MAX.doc }
+        },
+        required: ["tech", "key", "flow", "doc"]
+      },
+      total: { type: "integer", minimum: 0, maximum: 100, description: "Súčet bodov (server ho aj tak prepočíta)." },
+      strengths: { type: "string", description: "Silné stránky, stručne (max. cca 80 slov)." },
+      improvements: { type: "string", description: "Odporúčania na zlepšenie, stručne (max. cca 100 slov)." },
+      summary: { type: "string", description: "Celkové zhrnutie, 2–3 vety." }
+    },
+    required: ["criteria", "strengths", "improvements", "summary"]
+  }
+};
 
 function stamp() {
   const d = new Date();
@@ -151,46 +186,105 @@ async function saveAttempt(v, result, err) {
   return attempt;
 }
 
+// Opraví najčastejšie chyby, pre ktoré AI v texte vráti „neplatný“ JSON:
+//  - surové zalomenia riadkov / tabulátory vo vnútri reťazcov,
+//  - neescapované úvodzovky v texte (napr. použila „Tiny Planet“ s rovnými ")
+//  - čiarka pred zatváracou zátvorkou.
+function repairJson(s) {
+  let out = "", inStr = false, esc = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (!inStr) { if (c === '"') inStr = true; out += c; continue; }
+    if (esc) { out += c; esc = false; continue; }
+    if (c === "\\") { out += c; esc = true; continue; }
+    if (c === '"') {
+      // Reťazec končí len vtedy, ak za úvodzovkou nasleduje , : } ] (alebo koniec textu)
+      const m = s.slice(i + 1).match(/^\s*(.)/);
+      if (!m || ",:}]".includes(m[1])) { inStr = false; out += c; } else { out += '\\"'; }
+      continue;
+    }
+    if (c === "\n" || c === "\r" || c === "\t") { out += " "; continue; }
+    out += c;
+  }
+  return out.replace(/,\s*([}\]])/g, "$1");
+}
+
+// Z odpovede AI vytiahne objekt s hodnotením. Vracia { p } alebo { err }.
+function extractObject(data) {
+  const blocks = Array.isArray(data.content) ? data.content : [];
+
+  // 1) Preferovaná cesta: nástroj (hotový objekt, nič sa nemusí čítať z textu)
+  const tool = blocks.find(b => b && b.type === "tool_use" && b.input && typeof b.input === "object");
+  if (tool) return { p: tool.input };
+
+  // 2) Záloha: text s JSON-om
+  const txt = blocks.map(b => b.text || "").join("").trim();
+  if (!txt) return { err: "no_output" };
+  let s = txt.replace(/```json|```/gi, "").trim();
+  // AI niekedy pridá vetu pred/za JSON — vezmeme len objekt od prvej { po poslednú }
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a >= 0 && b > a) s = s.slice(a, b + 1);
+  try { return { p: JSON.parse(s) }; } catch { /* skúsime opraviť */ }
+  try { return { p: JSON.parse(repairJson(s)) }; } catch { /* nepodarilo sa */ }
+  // Začiatok odpovede sa uloží ako dôvod, aby sa dalo zistiť, čo AI vrátila
+  return { err: "bad_json: " + txt.replace(/\s+/g, " ").slice(0, 100) };
+}
+
 // Z odpovede AI vytvorí hodnotenie. Body kritérií sa orežú na maximum, „total“ je ich
 // súčet a známku určuje server podľa tabuľky (AI sa pri sčítaní občas pomýli).
-// Vracia { result } alebo { err } ("truncated" = odrezané na max_tokens, "bad_json").
+// Vracia { result } alebo { err } ("truncated" = odrezané na max_tokens, "bad_json", "no_output").
 function parseAI(data, v) {
-  const txt = (data.content || []).map(b => b.text || "").join("").trim();
-  try {
-    let s = txt.replace(/```json|```/g, "").trim();
-    // AI niekedy pridá vetu pred/za JSON — vezmeme len objekt od prvej { po poslednú }
-    const a = s.indexOf("{"), b = s.lastIndexOf("}");
-    if (a >= 0 && b > a) s = s.slice(a, b + 1);
-    const p = JSON.parse(s);
+  // Odrezaná odpoveď je neúplná (aj keď sa dá čiastočne prečítať) — radšej opakovať
+  if (data.stop_reason === "max_tokens") return { err: "truncated (max_tokens)" };
 
-    const raw = (p.criteria && typeof p.criteria === "object") ? p.criteria : {};
-    const criteria = {};
-    let haveAll = true, sum = 0;
-    for (const [k, max] of Object.entries(CRIT_MAX)) {
-      const n = Number(raw[k]);
-      if (!Number.isFinite(n)) { haveAll = false; continue; }
-      criteria[k] = Math.max(0, Math.min(max, Math.round(n)));
-    }
-    // Bez obrázka AI nevidí výsledok práce — kvalita a kompozícia max. 40 % (10 z 25 b.)
-    if (haveAll && v && v.imgN === 0) criteria.key = Math.min(criteria.key, 10);
-    if (haveAll) sum = Object.values(criteria).reduce((x, y) => x + y, 0);
+  const got = extractObject(data);
+  if (!got.p) return { err: got.err };
+  const p = got.p;
+  if (typeof p !== "object" || Array.isArray(p)) return { err: "bad_json: nie je objekt" };
 
-    let total = haveAll ? sum : Math.max(0, Math.min(100, parseInt(p.total) || 0));
-    if (!haveAll && v && v.imgN === 0) total = Math.min(total, 75);
-
-    return {
-      result: {
-        grade: gradeFor(total),
-        total,
-        criteria: haveAll ? criteria : {},
-        strengths: String(p.strengths || "Práca bola odovzdaná.").slice(0, 700),
-        improvements: String(p.improvements || "Doplň konkrétnejší komentár a snímky obrazovky.").slice(0, 900),
-        summary: String(p.summary || "Automatické hodnotenie.").slice(0, 500)
-      }
-    };
-  } catch {
-    return { err: data.stop_reason === "max_tokens" ? "truncated (max_tokens)" : "bad_json" };
+  const raw = (p.criteria && typeof p.criteria === "object") ? p.criteria : {};
+  const criteria = {};
+  let haveAll = true, sum = 0;
+  for (const [k, max] of Object.entries(CRIT_MAX)) {
+    const n = Number(raw[k]);
+    if (!Number.isFinite(n)) { haveAll = false; continue; }
+    criteria[k] = Math.max(0, Math.min(max, Math.round(n)));
   }
+  // Bez obrázka AI nevidí výsledok práce — kvalita a kompozícia max. 40 % (10 z 25 b.)
+  if (haveAll && v && v.imgN === 0) criteria.key = Math.min(criteria.key, 10);
+  if (haveAll) sum = Object.values(criteria).reduce((x, y) => x + y, 0);
+
+  let total = haveAll ? sum : Math.max(0, Math.min(100, parseInt(p.total) || 0));
+  if (!haveAll && v && v.imgN === 0) total = Math.min(total, 75);
+
+  return {
+    result: {
+      grade: gradeFor(total),
+      total,
+      criteria: haveAll ? criteria : {},
+      strengths: String(p.strengths || "Práca bola odovzdaná.").slice(0, 700),
+      improvements: String(p.improvements || "Doplň konkrétnejší komentár a snímky obrazovky.").slice(0, 900),
+      summary: String(p.summary || "Automatické hodnotenie.").slice(0, 500)
+    }
+  };
+}
+
+// Zavolá Anthropic API. Vracia { res, data } (res = odpoveď fetch-u).
+async function callAnthropic(headers, clean, maxTokens) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: maxTokens,
+      system: clean.system,
+      messages: clean.messages,
+      tools: [EVAL_TOOL],
+      tool_choice: { type: "tool", name: EVAL_TOOL.name }
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
 }
 
 export default async function handler(req, res) {
@@ -253,18 +347,14 @@ export default async function handler(req, res) {
       headers["anthropic-workspace-id"] = process.env.ANTHROPIC_WORKSPACE_ID;
     }
 
-    const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_OUT_TOKENS,
-        system: clean.system,
-        messages: clean.messages
-      })
-    });
+    const t0 = Date.now();
+    let { res: anthropicRes, data } = await callAnthropic(headers, clean, MAX_OUT_TOKENS);
 
-    const data = await anthropicRes.json();
+    // Dočasné preťaženie / chyba servera Anthropicu (429, 5xx, 529) — jedno opakovanie
+    if (!anthropicRes.ok && [429, 500, 502, 503, 529].includes(anthropicRes.status) && Date.now() - t0 < 25000) {
+      await new Promise(r => setTimeout(r, 1500));
+      ({ res: anthropicRes, data } = await callAnthropic(headers, clean, MAX_OUT_TOKENS));
+    }
 
     if (!anthropicRes.ok) {
       const msg = data?.error?.message || "Chyba pri volaní Anthropic API.";
@@ -277,7 +367,17 @@ export default async function handler(req, res) {
       return;
     }
 
-    const parsed = parseAI(data, v || { imgN: clean.imgN });
+    const vv = v || { imgN: clean.imgN };
+    let parsed = parseAI(data, vv);
+    // Odrezaná alebo nečitateľná odpoveď — jedno opakovanie s väčším limitom
+    if (!parsed.result && Date.now() - t0 < 35000) {
+      const again = await callAnthropic(headers, clean, RETRY_OUT_TOKENS);
+      if (again.res.ok) {
+        const p2 = parseAI(again.data, vv);
+        if (p2.result) data = again.data;
+        parsed = p2;
+      }
+    }
     const result = parsed.result;
     if (!result) {
       const savedPending = await savePending(parsed.err);
